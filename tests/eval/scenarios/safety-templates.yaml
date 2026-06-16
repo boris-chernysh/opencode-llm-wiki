@@ -5,6 +5,9 @@ command: wiki-reindex
 user_response: ""
 
 checks:
+  - type: file_exists
+    path: agent/tags-index.md
+    description: tags-index.md was created by reindex
   - type: content_not_contains
     path: agent/tags-index.md
     text: templates

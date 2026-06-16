@@ -1,27 +1,28 @@
 name: research-schema
 description: Output содержит все 5 секций + правильный фронтматтер
 fixture: minimal-vault
+setup_script: agent/scripts/index-tags.py && agent/scripts/generate-tags-index.py
 command: wiki-research здоровье
 user_response: ""
 
 checks:
-  - type: has_section
+  - type: dir_content_contains
     path: agent/research
-    section: topic
+    text: topic
     description: Research output has topic in frontmatter
-  - type: has_section
+  - type: dir_content_contains
     path: agent/research
-    section: Краткий снимок
+    text: Краткий снимок
     description: Has Краткий снимок section
-  - type: has_section
+  - type: dir_content_contains
     path: agent/research
-    section: Ключевые находки
+    text: Ключевые находки
     description: Has Ключевые находки section
-  - type: has_section
+  - type: dir_content_contains
     path: agent/research
-    section: Выводы
+    text: Выводы
     description: Has Выводы section
-  - type: has_section
+  - type: dir_content_contains
     path: agent/research
-    section: Источники
+    text: Источники
     description: Has Источники section

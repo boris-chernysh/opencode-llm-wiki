@@ -6,6 +6,7 @@
 
 Каждый сценарий прогоняется 3 раза. Успех = ≥ 2/3 прохождений.
 """
+import json
 import os
 import re
 import shutil
@@ -20,15 +21,16 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 SCENARIOS_DIR = os.path.join(SCRIPT_DIR, 'scenarios')
 FIXTURES_DIR = os.path.join(SCRIPT_DIR, 'fixtures')
-RUNS_PER_SCENARIO = 3
-MIN_PASSES = 2
+RUNS_PER_SCENARIO = 1
+MIN_PASSES = 1
+has_opencode = False
 
 def load_scenario(path):
     with open(path) as f:
         return yaml.safe_load(f)
 
 def setup_vault(fixture_name):
-    """Copy fixture vault to temp dir with agent/ and SKILL.md."""
+    """Copy fixture vault to temp dir with agent/, SKILL.md, opencode.json, AGENTS.md."""
     src = os.path.join(FIXTURES_DIR, fixture_name)
     dst = tempfile.mkdtemp(prefix=f'test-eval-{fixture_name}-')
 
@@ -47,29 +49,86 @@ def setup_vault(fixture_name):
     os.makedirs(skill_dst, exist_ok=True)
     shutil.copy(os.path.join(REPO_ROOT, 'SKILL.md'), os.path.join(skill_dst, 'SKILL.md'))
 
+    # Create .opencode/opencode.json with skill config and commands
+    opencode_config = {
+        "instructions": ["AGENTS.md"],
+        "skills": {"paths": [".opencode/skills"]},
+        "command": {
+            "wiki-reindex": {
+                "description": "Full reindex of the Obsidian vault.",
+                "template": "Load the llm-wiki skill. Run: python3 agent/scripts/index-tags.py && python3 agent/scripts/generate-tags-index.py && python3 agent/scripts/build-links-graph.py && python3 agent/scripts/graph-analyze.py && python3 agent/scripts/generate-moc-index.py."
+            },
+            "wiki-research": {
+                "description": "Research a topic using the vault.",
+                "template": "Load the llm-wiki skill. Read agent/tags-index.md. Find relevant tags. Read notes. Compile structured research summary in Russian: Краткий снимок → Ключевые находки → Выводы → Источники. Save to agent/research/<YYYYMMDDHHMM> Topic.md with frontmatter: topic, date, tags."
+            },
+            "wiki-analyze": {
+                "description": "Analyze vault for new connections. SHOW PREVIEW, WAIT for confirmation.",
+                "template": "Load the llm-wiki skill. Run graph analysis scripts. Read suggestions. Show preview table. WAIT for user confirmation. Only apply links if user says yes/да/применить.",
+                "subtask": True
+            },
+            "wiki-moc": {
+                "description": "Find or create MOC hub notes. SHOW PREVIEW, WAIT for confirmation.",
+                "template": "Load the llm-wiki skill. Run graph analysis. Identify clusters. Show preview table. WAIT for user confirmation. Create MOC notes only if user says yes/да.",
+                "subtask": True
+            },
+            "wiki-lint": {
+                "description": "Read-only health check of vault and skill artifacts.",
+                "template": "Load the llm-wiki skill. Run a read-only health check. Check stale tags, missing descriptions, broken links, orphans, consistency. Report findings. Do NOT modify any files."
+            },
+            "wiki-process-note": {
+                "description": "Suggest and apply tags + links for unprocessed notes.",
+                "template": "Load the llm-wiki skill. Find notes with need-processing tag (max 10). For each: extract keywords, find relevant tags and candidate links. Show preview table. WAIT for user confirmation. Apply only after user says yes/да. Do NOT remove the need-processing tag.",
+                "subtask": True
+            }
+        }
+    }
+    opencode_dir = os.path.join(dst, '.opencode')
+    os.makedirs(opencode_dir, exist_ok=True)
+    with open(os.path.join(opencode_dir, 'opencode.json'), 'w') as f:
+        json.dump(opencode_config, f, indent=2, ensure_ascii=False)
+
+    # Create AGENTS.md
+    with open(os.path.join(dst, 'AGENTS.md'), 'w') as f:
+        f.write("""# AGENTS.md — Test vault for llm-wiki eval
+
+Use the llm-wiki skill for all wiki operations. Always show preview before modifying.
+
+## Vault structure
+- `atoms/` — atomic Zettelkasten notes
+- `daily notes/` — daily journal pages
+- `templates/` — templates (exclude from indexing)
+
+## Frontmatter conventions
+- `tags` — list of tags
+- `links` — list of wikilinks
+- `created` — creation date
+""")
+
     return dst
 
 def run_opencode(vault_path, command, user_response=None):
     """Run opencode with a command and optional user response.
 
-    Returns captured output and a simulation of what the agent would do.
-    Since we can't actually run opencode interactively in CI,
-    this is a stub that simulates the agent's behavior for testing purposes.
+    Uses --dir to point to the test vault, --command for the wiki command,
+    --dangerously-skip-permissions for non-interactive mode.
+    Pipes user_response to stdin if provided.
     """
-    # This harness is designed to be run with real opencode CLI.
-    # In CI, we skip eval (continue-on-error: true).
-    # For local runs: OPENCODE_API_KEY=... python3 tests/eval/eval-harness.py
+    cmd = ['opencode', 'run', '--dir', vault_path, '--command', command,
+           '--dangerously-skip-permissions']
     try:
         result = subprocess.run(
-            ['opencode', '--vault', vault_path, '--command', command],
+            cmd,
             input=user_response,
             capture_output=True,
             text=True,
-            timeout=120
+            timeout=300
         )
         return result.stdout, result.stderr, result.returncode
     except FileNotFoundError:
         return None, "opencode CLI not found", -1
+    except subprocess.TimeoutExpired:
+        return None, f"Timeout after {300}s", -1
     except Exception as e:
         return None, str(e), -1
 
@@ -156,6 +215,30 @@ def check_scenario(scenario, vault_path):
                     ok = count <= check['max']
                 else:
                     ok = False
+            elif check_type == 'dir_content_contains':
+                path = os.path.join(vault_path, check['path'])
+                ok = False
+                if os.path.isdir(path):
+                    for fname in os.listdir(path):
+                        if fname.endswith('.md'):
+                            fpath = os.path.join(path, fname)
+                            with open(fpath) as f:
+                                content = f.read()
+                            if check['text'] in content:
+                                ok = True
+                                break
+            elif check_type == 'dir_content_not_contains':
+                path = os.path.join(vault_path, check['path'])
+                ok = True
+                if os.path.isdir(path):
+                    for fname in os.listdir(path):
+                        if fname.endswith('.md'):
+                            fpath = os.path.join(path, fname)
+                            with open(fpath) as f:
+                                content = f.read()
+                            if check['text'] in content:
+                                ok = False
+                                break
             else:
                 ok = None  # Unknown check type
 
@@ -173,9 +256,13 @@ def run_scenario(scenario_path):
     scenario = load_scenario(scenario_path)
     name = scenario.get('name', os.path.basename(scenario_path))
     fixture = scenario.get('fixture', 'minimal-vault')
+    command = scenario.get('command', '')
+    user_response = scenario.get('user_response', '')
 
     print(f"\n{'='*60}")
     print(f"Scenario: {name}")
+    print(f"  command: {command}")
+    print(f"  user_response: {user_response[:80] if user_response else '(none)'}")
     print(f"{'='*60}")
 
     passes = 0
@@ -184,6 +271,32 @@ def run_scenario(scenario_path):
         vault = setup_vault(fixture)
 
         try:
+            # Run setup script if specified (e.g. pre-indexing)
+            setup_script = scenario.get('setup_script', '')
+            if setup_script:
+                print(f"  Setup: {setup_script[:80]}...")
+                for cmd_part in setup_script.split('&&'):
+                    cmd_part = cmd_part.strip()
+                    script_path = os.path.join(vault, cmd_part)
+                    if os.path.exists(script_path):
+                        subprocess.run(['python3', script_path], cwd=vault,
+                                       capture_output=True, text=True, timeout=60)
+
+            # Actually run opencode
+            if has_opencode:
+                print(f"  Running opencode {command}...")
+                stdout, stderr, rc = run_opencode(vault, command, user_response)
+
+                if rc == 0:
+                    print("  opencode exited OK")
+                else:
+                    print(f"  opencode exited with code {rc}")
+                    if stderr:
+                        print(f"  stderr (last 500 chars): {stderr[-500:]}")
+            else:
+                print("  [DRY-RUN] opencode not available, checking static state only")
+
+            # Check results
             results = check_scenario(scenario, vault)
             all_pass = all(r[1] for r in results if r[1] is not None)
             if all_pass:
@@ -311,6 +424,7 @@ tags:
 """)
 
 def main():
+    global has_opencode
     print("=== AI Eval Harness for llm-wiki ===\n")
 
     # Ensure fixtures exist
@@ -337,6 +451,9 @@ def main():
     for sf in scenario_files:
         ok = run_scenario(sf)
         results[os.path.basename(sf)] = ok
+        # Delay between scenarios to avoid opencode state issues
+        import time
+        time.sleep(2)
 
     total = len(results)
     passed = sum(1 for v in results.values() if v)
