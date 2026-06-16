@@ -10,7 +10,6 @@ import json
 import os
 import re
 import shutil
-import signal
 import subprocess
 import sys
 import tempfile
@@ -169,44 +168,31 @@ Use the llm-wiki skill for all wiki operations. Always show preview before modif
     return dst
 
 def run_opencode(vault_path, command, user_response=None):
-    """Run opencode with a command and optional user response.
-
-    Uses --dir for the test vault, --command for the wiki command,
-    --dangerously-skip-permissions for non-interactive mode.
-    Pipes user_response to stdin if provided.
-    Kills process group on timeout to prevent zombies.
-    """
-    cmd = ['opencode', 'run', '--dir', vault_path, '--command', command,
-           '--dangerously-skip-permissions']
+    """Run opencode with a command and optional user response."""
+    # Split command into name and args: "wiki-research здоровье" -> ["wiki-research", "здоровье"]
+    parts = command.split(maxsplit=1)
+    cmd_name = parts[0]
+    cmd_args = parts[1:] if len(parts) > 1 else []
+    cmd = ['opencode', 'run', '--dir', vault_path, '--command', cmd_name,
+           '--dangerously-skip-permissions'] + cmd_args
     last_result = (None, "opencode retry exhausted", -1)
     for attempt in range(3):
-        proc = None
         try:
-            proc = subprocess.Popen(
+            result = subprocess.run(
                 cmd,
-                stdin=subprocess.PIPE if user_response else None,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                input=user_response,
+                capture_output=True,
                 text=True,
-                start_new_session=True
+                timeout=300
             )
-            stdout, stderr = proc.communicate(input=user_response, timeout=300)
-            rc = proc.returncode
-            last_result = (stdout, stderr, rc)
-            if rc == 0:
-                return stdout, stderr, rc
-            if 'UnknownError' in (stderr or '') and attempt < 2:
+            if result.returncode == 0:
+                return result.stdout, result.stderr, result.returncode
+            if 'UnknownError' in (result.stderr or '') and attempt < 2:
                 time.sleep(5)
                 continue
-            return stdout, stderr, rc
+            return result.stdout, result.stderr, result.returncode
         except subprocess.TimeoutExpired:
-            if proc:
-                try:
-                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-                except (ProcessLookupError, OSError):
-                    pass
-            last_result = (None, f"Timeout after 300s", -1)
-            return last_result
+            return None, f"Timeout after 300s", -1
         except FileNotFoundError:
             return None, "opencode CLI not found", -1
         except Exception as e:
@@ -215,12 +201,6 @@ def run_opencode(vault_path, command, user_response=None):
                 time.sleep(3)
                 continue
             return last_result
-        finally:
-            if proc and proc.returncode is None:
-                try:
-                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-                except (ProcessLookupError, OSError):
-                    pass
     return last_result
 
 def check_scenario(scenario, vault_path):
