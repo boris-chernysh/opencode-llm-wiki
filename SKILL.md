@@ -174,7 +174,6 @@ After any successful operation these hold:
 - **Never** add duplicate `links:` entries (dedup before writing).
 - **Never** create MOC notes for clusters with fewer than `min_cluster_size_for_moc` members or fewer than `min_tag_coherence_for_moc` shared tags.
 - **Never** apply more than `max_suggestions_to_validate` link suggestions per `wiki-analyze` run.
-- **Never** generate more than `max_descriptions_per_reindex` tag descriptions per reindex.
 
 ## Responsibility Matrix
 
@@ -203,7 +202,7 @@ Full rebuild of all agent artifacts from vault source.
 **Steps:**
 1. Run: `python3 agent/scripts/index-tags.py && python3 agent/scripts/generate-tags-index.py && python3 agent/scripts/build-links-graph.py && python3 agent/scripts/graph-analyze.py && python3 agent/scripts/generate-moc-index.py`
 2. Read tag index files in `agent/tags/`.
-3. For any tag index file **missing** a `description` field — generate one. Do NOT overwrite existing descriptions. Max 30 per run (see config).
+3. For any tag index file **missing** a `description` field — generate one. Do NOT overwrite existing descriptions.
 4. Re-run `generate-tags-index.py` to update consolidated index.
 5. Log to `agent/LOG.md`.
 
@@ -216,8 +215,8 @@ Research a topic using tag indices.
 
 **Steps:**
 1. Read `agent/tags-index.md`. Find relevant tags by keyword match on tag names and descriptions.
-2. For each relevant tag (max 10), read `agent/tags/<tag>.md` to discover connected notes.
-3. Read notes (max 50 total).
+2. For each relevant tag, read `agent/tags/<tag>.md` to discover connected notes.
+3. Read notes.
 4. Compile structured research summary following research output schema.
 5. Save to `agent/research/<YYYYMMDDHHMM> Topic.md`.
 6. Return summary to user and log.
@@ -405,7 +404,6 @@ MOC notes reference cluster members by `[[wikilink]]`, not by cluster ID. The MO
 
 ### Tag Descriptions
 - Only generated when **missing** (absent field in frontmatter), never overwritten.
-- Batch limit: `max_descriptions_per_reindex` (config, default 30).
 - Format: one Russian sentence, no colons, no markdown.
 
 ## Config
@@ -420,9 +418,6 @@ MOC notes reference cluster members by `[[wikilink]]`, not by cluster ID. The MO
     "max_moc_per_run": 5,
     "max_link_suggestions": 50,
     "max_suggestions_to_validate": 20,
-    "max_tags_per_research": 10,
-    "max_notes_per_research": 50,
-    "max_descriptions_per_reindex": 30,
     "min_tfidf_similarity": 0.20,
     "min_content_tokens": 50
   },

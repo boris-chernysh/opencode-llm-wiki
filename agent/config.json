@@ -5,9 +5,6 @@
     "max_moc_per_run": 5,
     "max_link_suggestions": 50,
     "max_suggestions_to_validate": 20,
-    "max_tags_per_research": 10,
-    "max_notes_per_research": 50,
-    "max_descriptions_per_reindex": 30,
     "min_tfidf_similarity": 0.20,
     "min_content_tokens": 50
   },
