@@ -1,0 +1,8 @@
+agent/tags/
+agent/data/
+agent/research/
+agent/moc-index.md
+agent/tags-index.md
+agent/LOG.md
+__pycache__/
+.DS_Store

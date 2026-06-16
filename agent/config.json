@@ -1,0 +1,23 @@
+{
+  "thresholds": {
+    "min_cluster_size_for_moc": 5,
+    "min_tag_coherence_for_moc": 3,
+    "max_moc_per_run": 5,
+    "max_link_suggestions": 50,
+    "max_suggestions_to_validate": 20,
+    "max_tags_per_research": 10,
+    "max_notes_per_research": 50,
+    "max_descriptions_per_reindex": 30,
+    "min_tfidf_similarity": 0.20,
+    "min_content_tokens": 50
+  },
+  "exclude": {
+    "tags": ["need-processing", "daily-note"],
+    "dirs_from_suggestions": ["daily notes"],
+    "dirs_from_graph": []
+  },
+  "source_dirs": {
+    "tags": ["atoms", "daily notes"],
+    "graph": ["atoms"]
+  }
+}

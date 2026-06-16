@@ -1,0 +1,25 @@
+[project]
+name = "opencode-llm-wiki"
+version = "0.1.0"
+description = "AI skill for Obsidian vault: tags, graph, TF-IDF, MOC hubs, research, linting"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [{name = "Boris Chernysh"}]
+keywords = ["obsidian", "zettelkasten", "llm", "ai", "wiki", "knowledge-graph"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Text Processing :: Markup",
+]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = ["E501"]
