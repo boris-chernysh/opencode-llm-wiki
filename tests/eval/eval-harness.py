@@ -176,7 +176,7 @@ def run_opencode(vault_path, command, user_response=None):
     """
     cmd = ['opencode', 'run', '--dir', vault_path, '--command', command,
            '--dangerously-skip-permissions']
-    for attempt in range(2):
+    for attempt in range(3):
         try:
             result = subprocess.run(
                 cmd,
@@ -187,8 +187,8 @@ def run_opencode(vault_path, command, user_response=None):
             )
             if result.returncode == 0:
                 return result.stdout, result.stderr, result.returncode
-            if 'UnknownError' in (result.stderr or '') and attempt == 0:
-                time.sleep(3)
+            if 'UnknownError' in (result.stderr or '') and attempt < 2:
+                time.sleep(5)
                 continue
             return result.stdout, result.stderr, result.returncode
         except subprocess.TimeoutExpired:
@@ -365,41 +365,6 @@ def run_scenario(scenario_path):
                         print(f"  stderr (last 500 chars): {stderr[-500:]}")
             else:
                 print("  [DRY-RUN] opencode not available, checking static state only")
-
-            # Hardcoded preseed for research-schema (YAML parser can't handle | blocks)
-            if name == 'research-schema':
-                research_dir = os.path.join(vault, 'agent', 'research')
-                os.makedirs(research_dir, exist_ok=True)
-                with open(os.path.join(research_dir, '202501010000 Здоровье.md'), 'w') as f:
-                    f.write("""---
-topic: здоровье
-date: 2025-01-01
-tags:
-  - здоровье
-  - питание
-  - спорт
----
-
-# Здоровье
-
-## Краткий снимок
-
-Тема здоровья охватывает питание и спорт.
-
-## Ключевые находки
-
-- Находка 1
-- Находка 2
-
-## Выводы
-
-Выводы по исследованию.
-
-## Источники
-
-- [[202501010001 Здоровое питание]]
-- [[202501010002 Спорт и тренировки]]
-""")
 
             # Check results
             results = check_scenario(scenario, vault)

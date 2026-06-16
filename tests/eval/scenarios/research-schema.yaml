@@ -1,7 +1,6 @@
 name: research-schema
 description: Output содержит все 5 секций + правильный фронтматтер
 fixture: minimal-vault
-skip_opencode: true
 setup_script: agent/scripts/index-tags.py && agent/scripts/generate-tags-index.py
 command: wiki-research здоровье
 user_response: ""
