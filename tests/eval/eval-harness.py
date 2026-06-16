@@ -28,28 +28,49 @@ def _parse_simple_yaml(path):
         stripped = line.strip()
         if not stripped or stripped.startswith('#'):
             continue
+        has_indent = len(line) > 0 and line[0] == ' '
         if stripped.startswith('- '):
             if current_list is not None and current_item is not None:
                 result.setdefault(current_list, []).append(current_item)
-            current_item = {}
+            elif not has_indent and current_item is not None:
+                # Dangling item from previous list
+                pass
+            if not has_indent:
+                current_item = None
+                current_list = None
+            else:
+                current_item = {}
             content = stripped[2:]
             if ':' in content:
                 key, _, val = content.partition(':')
-                current_item[key.strip()] = val.strip()
+                val = val.strip()
+                if val.startswith('"') and val.endswith('"'):
+                    val = val[1:-1]
+                if current_item is not None:
+                    current_item[key.strip()] = val
+                else:
+                    current_item = {key.strip(): val}
         elif ':' in stripped:
-            if current_item is not None and current_list is not None:
-                result.setdefault(current_list, []).append(current_item)
-                current_item = None
-                current_list = None
-            key, _, val = stripped.partition(':')
-            key = key.strip()
-            val = val.strip()
-            if val == '':
-                current_list = key
-            elif val.startswith('"') and val.endswith('"'):
-                result[key] = val[1:-1]
+            if has_indent and current_item is not None:
+                key, _, val = stripped.partition(':')
+                val = val.strip()
+                if val.startswith('"') and val.endswith('"'):
+                    val = val[1:-1]
+                current_item[key.strip()] = val
             else:
-                result[key] = val
+                if current_item is not None and current_list is not None:
+                    result.setdefault(current_list, []).append(current_item)
+                    current_item = None
+                    current_list = None
+                key, _, val = stripped.partition(':')
+                key = key.strip()
+                val = val.strip()
+                if val == '':
+                    current_list = key
+                elif val.startswith('"') and val.endswith('"'):
+                    result[key] = val[1:-1]
+                else:
+                    result[key] = val
     if current_item is not None and current_list is not None:
         result.setdefault(current_list, []).append(current_item)
     return result
