@@ -9,11 +9,11 @@ Writes agent/data/semantic-suggestions.md.
 Filters out daily-notes noise: excludes pairs where both notes
 are from excluded directories or have only excluded tags.
 """
-import os
-import re
 import json
 import math
-from collections import defaultdict, Counter
+import os
+import re
+from collections import Counter, defaultdict
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -34,7 +34,7 @@ EXCLUDED_TAGS = {'daily-note'}
 def load_config():
     if os.path.exists(CONFIG_PATH):
         try:
-            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+            with open(CONFIG_PATH, encoding='utf-8') as f:
                 cfg = json.load(f)
             global EXCLUDED_DIRS, EXCLUDED_TAGS, MAX_SUGGESTIONS, MIN_SIMILARITY, MIN_CONTENT_TOKENS
             EXCLUDED_DIRS = cfg.get('exclude', {}).get('dirs_from_suggestions', EXCLUDED_DIRS)
@@ -134,7 +134,7 @@ def suggest(graph):
         if not os.path.isfile(full_path):
             continue
         try:
-            with open(full_path, 'r', encoding='utf-8') as f:
+            with open(full_path, encoding='utf-8') as f:
                 content = f.read()
             parts = content.split('---', 2)
             body = parts[2] if len(parts) >= 3 else content
@@ -226,7 +226,7 @@ def main():
 
 
 def load_graph_local():
-    with open(GRAPH_PATH, 'r', encoding='utf-8') as f:
+    with open(GRAPH_PATH, encoding='utf-8') as f:
         return json.load(f)
 
 

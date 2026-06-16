@@ -7,9 +7,8 @@ and writes agent/data/link-suggestions.md.
 Filters out daily-notes noise: excludes pairs where both notes
 are from excluded directories or have only excluded tags.
 """
-import os
 import json
-import math
+import os
 from collections import defaultdict
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -29,7 +28,7 @@ EXCLUDED_TAGS = {'daily-note'}
 def load_config():
     if os.path.exists(CONFIG_PATH):
         try:
-            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+            with open(CONFIG_PATH, encoding='utf-8') as f:
                 cfg = json.load(f)
             global EXCLUDED_DIRS, EXCLUDED_TAGS, MAX_SUGGESTIONS
             EXCLUDED_DIRS = cfg.get('exclude', {}).get('dirs_from_suggestions', EXCLUDED_DIRS)
@@ -51,7 +50,7 @@ def is_excluded(fname, nodes):
 
 
 def load_graph():
-    with open(GRAPH_PATH, 'r', encoding='utf-8') as f:
+    with open(GRAPH_PATH, encoding='utf-8') as f:
         return json.load(f)
 
 

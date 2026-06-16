@@ -4,10 +4,9 @@
 Extracts `links` frontmatter field and `[[wikilinks]]` from body,
 builds an adjacency graph, and writes agent/data/links-graph.json.
 """
+import json
 import os
 import re
-import json
-import sys
 from collections import defaultdict
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -21,7 +20,7 @@ def load_config():
     global SOURCE_DIRS
     if os.path.exists(CONFIG_PATH):
         try:
-            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+            with open(CONFIG_PATH, encoding='utf-8') as f:
                 cfg = json.load(f)
             SOURCE_DIRS = cfg.get('source_dirs', {}).get('graph', SOURCE_DIRS)
         except (json.JSONDecodeError, KeyError):
@@ -123,7 +122,7 @@ def build_graph():
                 filepath = os.path.join(root, fname)
                 rel_path = os.path.relpath(filepath, PROJECT_ROOT)
 
-                with open(filepath, 'r', encoding='utf-8') as f:
+                with open(filepath, encoding='utf-8') as f:
                     content = f.read()
 
                 frontmatter, body = parse_frontmatter(content)
@@ -150,8 +149,8 @@ def build_graph():
                         fm_links.extend(extract_content_wikilinks(raw))
 
                 body_links_raw = extract_content_wikilinks(body)
-                body_links = {normalize_filename(l) for l in body_links_raw}
-                fm_links_norm = {normalize_filename(l) for l in fm_links}
+                body_links = {normalize_filename(link) for link in body_links_raw}
+                fm_links_norm = {normalize_filename(link) for link in fm_links}
 
                 all_out = fm_links_norm | body_links
                 all_out.discard(fname)

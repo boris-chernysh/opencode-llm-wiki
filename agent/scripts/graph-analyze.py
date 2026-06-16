@@ -4,9 +4,8 @@
 Loads agent/data/links-graph.json, performs graph analysis,
 and writes agent/data/graph-stats.md.
 """
-import os
 import json
-import math
+import os
 from collections import defaultdict, deque
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +18,7 @@ TOP_N = 20
 
 
 def load_graph():
-    with open(GRAPH_PATH, 'r', encoding='utf-8') as f:
+    with open(GRAPH_PATH, encoding='utf-8') as f:
         return json.load(f)
 
 

@@ -8,7 +8,7 @@ INDEX_PATH = os.path.join(PROJECT_ROOT, 'agent', 'tags-index.md')
 
 
 def extract_description(filepath):
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding='utf-8') as f:
         content = f.read()
     if content.startswith('---'):
         parts = content.split('---', 2)

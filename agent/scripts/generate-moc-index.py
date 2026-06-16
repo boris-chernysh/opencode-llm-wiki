@@ -4,9 +4,8 @@
 Scans atoms/ for notes with `links:` frontmatter field,
 identifies hub notes (high out-degree), and generates agent/moc-index.md.
 """
-import os
-import re
 import json
+import os
 from collections import defaultdict
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +23,7 @@ def load_config():
     global MIN_LINKS
     if os.path.exists(CONFIG_PATH):
         try:
-            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+            with open(CONFIG_PATH, encoding='utf-8') as f:
                 cfg = json.load(f)
             MIN_LINKS = cfg.get('thresholds', {}).get('min_cluster_size_for_moc', MIN_LINKS)
         except (json.JSONDecodeError, KeyError):
@@ -32,7 +31,7 @@ def load_config():
 
 
 def load_graph():
-    with open(GRAPH_PATH, 'r', encoding='utf-8') as f:
+    with open(GRAPH_PATH, encoding='utf-8') as f:
         return json.load(f)
 
 

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
+import json
 import os
 import re
-import sys
-import json
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -16,7 +15,7 @@ def load_config():
     global SOURCE_DIRS, EXCLUDED_TAGS
     if os.path.exists(CONFIG_PATH):
         try:
-            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+            with open(CONFIG_PATH, encoding='utf-8') as f:
                 cfg = json.load(f)
             SOURCE_DIRS = cfg.get('source_dirs', {}).get('tags', SOURCE_DIRS)
             EXCLUDED_TAGS = set(cfg.get('exclude', {}).get('tags', list(EXCLUDED_TAGS)))
@@ -59,7 +58,7 @@ def parse_frontmatter_tags(lines):
 
 def extract_tags(filepath):
     tags = set()
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding='utf-8') as f:
         content = f.read()
 
     body = content
@@ -88,7 +87,7 @@ def extract_tags(filepath):
 def get_existing_description(index_path):
     if not os.path.exists(index_path):
         return None
-    with open(index_path, 'r', encoding='utf-8') as f:
+    with open(index_path, encoding='utf-8') as f:
         content = f.read()
     if content.startswith('---'):
         parts = content.split('---', 2)
