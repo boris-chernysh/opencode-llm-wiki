@@ -4,7 +4,6 @@ import os
 import subprocess
 import sys
 
-
 TEST_VAULT = sys.argv[1]
 INDEX_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')
 BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')

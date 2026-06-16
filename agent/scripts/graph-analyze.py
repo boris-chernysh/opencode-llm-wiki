@@ -6,6 +6,7 @@ and writes agent/data/graph-stats.md.
 """
 import json
 import os
+
 from collections import defaultdict, deque
 
 
