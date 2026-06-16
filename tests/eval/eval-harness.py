@@ -15,7 +15,49 @@ import sys
 import tempfile
 from glob import glob
 
-import yaml
+
+# Minimal YAML parser — avoids pyyaml dependency
+def _parse_simple_yaml(path):
+    """Parse a simple flat YAML file with lists of dicts."""
+    with open(path) as f:
+        lines = f.readlines()
+    result = {}
+    current_list = None
+    current_item = None
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith('#'):
+            continue
+        if stripped.startswith('- '):
+            if current_list is not None and current_item is not None:
+                result.setdefault(current_list, []).append(current_item)
+            current_item = {}
+            content = stripped[2:]
+            if ':' in content:
+                key, _, val = content.partition(':')
+                current_item[key.strip()] = val.strip()
+        elif ':' in stripped:
+            if current_item is not None and current_list is not None:
+                result.setdefault(current_list, []).append(current_item)
+                current_item = None
+                current_list = None
+            key, _, val = stripped.partition(':')
+            key = key.strip()
+            val = val.strip()
+            if val == '':
+                current_list = key
+            elif val.startswith('"') and val.endswith('"'):
+                result[key] = val[1:-1]
+            else:
+                result[key] = val
+    if current_item is not None and current_list is not None:
+        result.setdefault(current_list, []).append(current_item)
+    return result
+
+
+def load_scenario(path):
+    return _parse_simple_yaml(path)
+
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -24,10 +66,6 @@ FIXTURES_DIR = os.path.join(SCRIPT_DIR, 'fixtures')
 RUNS_PER_SCENARIO = 1
 MIN_PASSES = 1
 has_opencode = False
-
-def load_scenario(path):
-    with open(path) as f:
-        return yaml.safe_load(f)
 
 def setup_vault(fixture_name):
     """Copy fixture vault to temp dir with agent/, SKILL.md, opencode.json, AGENTS.md."""
