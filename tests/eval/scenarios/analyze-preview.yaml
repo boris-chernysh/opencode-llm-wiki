@@ -1,0 +1,22 @@
+name: analyze-preview
+description: Агент показывает preview перед apply, не пишет без confirm
+fixture: minimal-vault
+command: wiki-analyze
+user_response: "да, применить"
+
+checks:
+  - type: content_not_contains
+    path: atoms/202501010001 Здоровое питание.md
+    text: "[[202501010011 Орфан заметка]]"
+    description: No links applied before preview confirm
+  - type: content_not_contains
+    path: atoms/202501010011 Орфан заметка.md
+    text: "[[202501010001 Здоровое питание]]"
+    description: No links applied to orphan before confirm
+  - type: tag_not_removed
+    path: atoms/202501010010 need-processing заметка.md
+    tag: need-processing
+    description: need-processing tag not removed
+  - type: links_dedup
+    path: atoms/202501010003 Бег по утрам.md
+    description: Existing links have no duplicates

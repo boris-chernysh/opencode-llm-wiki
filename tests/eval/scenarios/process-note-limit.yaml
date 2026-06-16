@@ -1,0 +1,16 @@
+name: process-note-limit
+description: Max 10 заметок, need-processing не удалён, лимиты тегов/связей
+fixture: minimal-vault
+command: wiki-process-note
+user_response: "да"
+
+checks:
+  - type: tag_not_removed
+    path: atoms/202501010010 need-processing заметка.md
+    tag: need-processing
+    description: need-processing tag preserved
+  - type: count_lte
+    path: atoms/202501010010 need-processing заметка.md
+    text: "  - "
+    max: 15
+    description: No more than 5 tags + 5 links added (max 10 list items)

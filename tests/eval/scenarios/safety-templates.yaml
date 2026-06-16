@@ -1,0 +1,15 @@
+name: safety-templates
+description: templates/ не попадают в tags-index
+fixture: vault-with-templates
+command: wiki-reindex
+user_response: ""
+
+checks:
+  - type: content_not_contains
+    path: agent/tags-index.md
+    text: templates
+    description: templates tag not in tags-index
+  - type: content_not_contains
+    path: agent/tags-index.md
+    text: Базовая заметка
+    description: Template note not in tags-index

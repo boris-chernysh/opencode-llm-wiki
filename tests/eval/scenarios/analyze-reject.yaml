@@ -1,0 +1,19 @@
+name: analyze-reject
+description: Агент НЕ применяет ссылки при отказе пользователя
+fixture: minimal-vault
+command: wiki-analyze
+user_response: "может позже"
+
+checks:
+  - type: content_not_contains
+    path: atoms/202501010001 Здоровое питание.md
+    text: "[[202501010011 Орфан заметка]]"
+    description: No links applied after rejection
+  - type: content_not_contains
+    path: atoms/202501010011 Орфан заметка.md
+    text: "[[202501010001 Здоровое питание]]"
+    description: No links applied to orphan after rejection
+  - type: content_not_contains
+    path: atoms/202501010002 Спорт и тренировки.md
+    text: "links:"
+    description: No new links field created on rejection
