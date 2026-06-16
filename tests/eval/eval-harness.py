@@ -192,7 +192,7 @@ def run_opencode(vault_path, command, user_response=None):
                 continue
             return result.stdout, result.stderr, result.returncode
         except subprocess.TimeoutExpired:
-            return None, f"Timeout after 300s", -1
+            return None, "Timeout after 300s", -1
         except FileNotFoundError:
             return None, "opencode CLI not found", -1
         except Exception as e:
