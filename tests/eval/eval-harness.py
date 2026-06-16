@@ -6,16 +6,15 @@
 
 Каждый сценарий прогоняется 3 раза. Успех = ≥ 2/3 прохождений.
 """
-import sys
-import os
-import yaml
-import subprocess
-import tempfile
-import shutil
-import json
-import re
 from glob import glob
-from collections import defaultdict
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import yaml
+
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -24,11 +23,9 @@ FIXTURES_DIR = os.path.join(SCRIPT_DIR, 'fixtures')
 RUNS_PER_SCENARIO = 3
 MIN_PASSES = 2
 
-
 def load_scenario(path):
-    with open(path, 'r') as f:
+    with open(path) as f:
         return yaml.safe_load(f)
-
 
 def setup_vault(fixture_name):
     """Copy fixture vault to temp dir with agent/ and SKILL.md."""
@@ -51,7 +48,6 @@ def setup_vault(fixture_name):
     shutil.copy(os.path.join(REPO_ROOT, 'SKILL.md'), os.path.join(skill_dst, 'SKILL.md'))
 
     return dst
-
 
 def run_opencode(vault_path, command, user_response=None):
     """Run opencode with a command and optional user response.
@@ -77,7 +73,6 @@ def run_opencode(vault_path, command, user_response=None):
     except Exception as e:
         return None, str(e), -1
 
-
 def check_scenario(scenario, vault_path):
     """Run scenario checks against the vault."""
     checks = scenario.get('checks', [])
@@ -97,7 +92,7 @@ def check_scenario(scenario, vault_path):
             elif check_type == 'content_contains':
                 path = os.path.join(vault_path, check['path'])
                 if os.path.isfile(path):
-                    with open(path, 'r') as f:
+                    with open(path) as f:
                         content = f.read()
                     ok = check['text'] in content
                 else:
@@ -105,7 +100,7 @@ def check_scenario(scenario, vault_path):
             elif check_type == 'content_not_contains':
                 path = os.path.join(vault_path, check['path'])
                 if os.path.isfile(path):
-                    with open(path, 'r') as f:
+                    with open(path) as f:
                         content = f.read()
                     ok = check['text'] not in content
                 else:
@@ -113,7 +108,7 @@ def check_scenario(scenario, vault_path):
             elif check_type == 'count_equals':
                 path = os.path.join(vault_path, check['path'])
                 if os.path.isfile(path):
-                    with open(path, 'r') as f:
+                    with open(path) as f:
                         content = f.read()
                     count = content.count(check['text'])
                     ok = count == check['expected']
@@ -122,7 +117,7 @@ def check_scenario(scenario, vault_path):
             elif check_type == 'has_frontmatter_field':
                 path = os.path.join(vault_path, check['path'])
                 if os.path.isfile(path):
-                    with open(path, 'r') as f:
+                    with open(path) as f:
                         content = f.read()
                     ok = check['field'] in content and '---' in content
                 else:
@@ -130,7 +125,7 @@ def check_scenario(scenario, vault_path):
             elif check_type == 'has_section':
                 path = os.path.join(vault_path, check['path'])
                 if os.path.isfile(path):
-                    with open(path, 'r') as f:
+                    with open(path) as f:
                         content = f.read()
                     ok = check['section'] in content
                 else:
@@ -138,7 +133,7 @@ def check_scenario(scenario, vault_path):
             elif check_type == 'links_dedup':
                 path = os.path.join(vault_path, check['path'])
                 if os.path.isfile(path):
-                    with open(path, 'r') as f:
+                    with open(path) as f:
                         content = f.read()
                     links = re.findall(r'\[\[([^\]]+)\]\]', content)
                     ok = len(links) == len(set(links))
@@ -147,7 +142,7 @@ def check_scenario(scenario, vault_path):
             elif check_type == 'tag_not_removed':
                 path = os.path.join(vault_path, check['path'])
                 if os.path.isfile(path):
-                    with open(path, 'r') as f:
+                    with open(path) as f:
                         content = f.read()
                     ok = check['tag'] in content
                 else:
@@ -155,7 +150,7 @@ def check_scenario(scenario, vault_path):
             elif check_type == 'count_lte':
                 path = os.path.join(vault_path, check['path'])
                 if os.path.isfile(path):
-                    with open(path, 'r') as f:
+                    with open(path) as f:
                         content = f.read()
                     count = content.count(check['text'])
                     ok = count <= check['max']
@@ -173,7 +168,6 @@ def check_scenario(scenario, vault_path):
             print(f"  [FAIL] {description}: {e}")
 
     return results
-
 
 def run_scenario(scenario_path):
     scenario = load_scenario(scenario_path)
@@ -194,7 +188,7 @@ def run_scenario(scenario_path):
             all_pass = all(r[1] for r in results if r[1] is not None)
             if all_pass:
                 passes += 1
-                print(f"  -> ALL CHECKS PASSED")
+                print("  -> ALL CHECKS PASSED")
             else:
                 failed = [r[0] for r in results if r[1] is False]
                 print(f"  -> FAILED: {', '.join(failed)}")
@@ -205,7 +199,6 @@ def run_scenario(scenario_path):
     status_str = "PASS" if ok else "FAIL"
     print(f"\n  Result: {status_str} ({passes}/{RUNS_PER_SCENARIO} runs passed)")
     return ok
-
 
 def create_minimal_vault():
     """Create minimal vault fixture if it doesn't exist."""
@@ -291,7 +284,6 @@ tags:
 Дневная заметка.
 """)
 
-
 def create_templates_vault():
     """Create vault with templates/ for safety test."""
     fixture_path = os.path.join(FIXTURES_DIR, 'vault-with-templates')
@@ -318,7 +310,6 @@ tags:
 Шаблон.
 """)
 
-
 def main():
     print("=== AI Eval Harness for llm-wiki ===\n")
 
@@ -329,10 +320,7 @@ def main():
     # Check if opencode CLI is available
     try:
         subprocess.run(['opencode', '--version'], capture_output=True, timeout=5)
-        has_opencode = True
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        has_opencode = False
-        print("⚠ opencode CLI not found — eval will run as dry-run (static checks only)\n")
+        except (FileNotFoundError, subprocess.TimeoutExpired):
 
     scenario_files = sorted(glob(os.path.join(SCENARIOS_DIR, '*.yaml')))
     if not scenario_files:
@@ -354,7 +342,6 @@ def main():
         print(f"  {'PASS' if ok else 'FAIL'} — {name}")
 
     return 0 if passed == total else 1
-
 
 if __name__ == '__main__':
     sys.exit(main())

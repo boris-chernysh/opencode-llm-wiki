@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Regression: all scripts run on empty vault without crashing."""
-import sys
 import os
+import shutil
 import subprocess
 import tempfile
-import shutil
+
 
 # Create empty vault
 empty_vault = tempfile.mkdtemp(prefix='test-empty-vault-')
@@ -45,10 +45,10 @@ try:
         links_graph = os.path.join(data_dir, 'links-graph.json')
         if os.path.exists(links_graph):
             import json
-            with open(links_graph, 'r') as f:
+            with open(links_graph) as f:
                 graph = json.load(f)
             assert graph['stats']['total_nodes'] == 0, "Empty vault should have 0 nodes"
 
-    print(f"PASS: test_empty_vault — all 7 scripts handle empty vault gracefully")
+    print("PASS: test_empty_vault — all 7 scripts handle empty vault gracefully")
 finally:
     shutil.rmtree(empty_vault, ignore_errors=True)

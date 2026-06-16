@@ -43,6 +43,6 @@ try:
     tag_files = [f for f in os.listdir(tags_dir) if f.endswith('.md')]
     assert len(tag_files) > 0, "Should index tags without config"
 
-    print(f"PASS: test_no_config — scripts use defaults without config.json")
+    print("PASS: test_no_config — scripts use defaults without config.json")
 finally:
     shutil.rmtree(vault, ignore_errors=True)

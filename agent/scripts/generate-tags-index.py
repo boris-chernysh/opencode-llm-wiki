@@ -6,7 +6,6 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 TAGS_DIR = os.path.join(PROJECT_ROOT, 'agent', 'tags')
 INDEX_PATH = os.path.join(PROJECT_ROOT, 'agent', 'tags-index.md')
 
-
 def extract_description(filepath):
     with open(filepath, encoding='utf-8') as f:
         content = f.read()
@@ -18,7 +17,6 @@ def extract_description(filepath):
                 if line.startswith('description:'):
                     return line.split(':', 1)[1].strip()
     return None
-
 
 def generate():
     entries = []
@@ -40,7 +38,6 @@ def generate():
         out.write('\n'.join(lines) + '\n')
 
     print(f'Tags index written: {len(entries)} tags.')
-
 
 if __name__ == '__main__':
     generate()

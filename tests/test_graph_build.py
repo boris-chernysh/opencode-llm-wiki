@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test build-links-graph.py: nodes, edges, links_in/out consistency."""
-import sys
+import json
 import os
 import subprocess
-import json
+import sys
+
 
 TEST_VAULT = sys.argv[1]
 BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
@@ -12,7 +13,7 @@ GRAPH_PATH = os.path.join(TEST_VAULT, 'agent', 'data', 'links-graph.json')
 result = subprocess.run(['python3', BUILD_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 assert result.returncode == 0, f"build-links-graph.py failed: {result.stderr}"
 
-with open(GRAPH_PATH, 'r') as f:
+with open(GRAPH_PATH) as f:
     graph = json.load(f)
 
 nodes = graph['nodes']

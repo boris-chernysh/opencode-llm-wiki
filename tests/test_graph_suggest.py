@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Test graph-suggest-links.py: Jaccard > 0, shared neighbors, max 50."""
-import sys
 import os
 import subprocess
-import json
+import sys
+
 
 TEST_VAULT = sys.argv[1]
 BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
@@ -14,13 +14,13 @@ subprocess.run(['python3', BUILD_SCRIPT], cwd=TEST_VAULT, capture_output=True, t
 result = subprocess.run(['python3', SUGGEST_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 assert result.returncode == 0, f"graph-suggest-links.py failed: {result.stderr}"
 
-with open(SUGGEST_PATH, 'r') as f:
+with open(SUGGEST_PATH) as f:
     content = f.read()
 
 assert 'Link Suggestions' in content, "Should have suggestions header"
 
 # Count suggestions in the table
-lines = [l for l in content.split('\n') if l.startswith('| ') and l.count('|') >= 5 and not l.startswith('| #') and not l.startswith('|---')]
+lines = [l for line in content.split('\n') if line.startswith('| ') and line.count('|') >= 5 and not line.startswith('| #') and not line.startswith('|---')]
 assert len(lines) <= 50, f"Should be ≤ 50 suggestions, got {len(lines)}"
 
 # Daily notes should not appear in suggestions (both notes excluded)

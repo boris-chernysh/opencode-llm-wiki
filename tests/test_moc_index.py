@@ -16,7 +16,7 @@ subprocess.run(['python3', ANALYZE_SCRIPT], cwd=TEST_VAULT, capture_output=True,
 result = subprocess.run(['python3', MOC_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 assert result.returncode == 0, f"generate-moc-index.py failed: {result.stderr}"
 
-with open(MOC_PATH, 'r') as f:
+with open(MOC_PATH) as f:
     content = f.read()
 
 assert 'MOC index' in content, "Should have MOC index header"
@@ -25,7 +25,7 @@ assert 'MOC index' in content, "Should have MOC index header"
 import re
 wikilinks = re.findall(r'\[\[([^\]]+)\]\]', content)
 graph_path = os.path.join(TEST_VAULT, 'agent', 'data', 'links-graph.json')
-with open(graph_path, 'r') as f:
+with open(graph_path) as f:
     graph = json.load(f)
 nodes = graph['nodes']
 
@@ -36,4 +36,4 @@ for link in wikilinks:
         link_name += '.md'
     assert link_name in nodes, f"MOC links to nonexistent note: {link_name}"
 
-print(f"PASS: test_moc_index")
+print("PASS: test_moc_index")

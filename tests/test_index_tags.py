@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Test index-tags.py: tag indexing, hex filter, exclusion, stale removal."""
-import sys
 import os
 import subprocess
-import json
+import sys
+
 
 TEST_VAULT = sys.argv[1]
 SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')

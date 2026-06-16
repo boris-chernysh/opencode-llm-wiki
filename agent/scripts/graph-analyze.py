@@ -16,23 +16,19 @@ OUTPUT_PATH = os.path.join(DATA_DIR, 'graph-stats.md')
 
 TOP_N = 20
 
-
 def load_graph():
     with open(GRAPH_PATH, encoding='utf-8') as f:
         return json.load(f)
 
-
 def find_hubs(nodes):
     ranked = sorted(nodes.items(), key=lambda x: x[1]['degree_in'] + x[1]['degree_out'], reverse=True)
     return ranked[:TOP_N]
-
 
 def find_orphans(nodes):
     return sorted(
         [name for name, node in nodes.items()
          if node['degree_out'] == 0 and node['degree_in'] == 0]
     )
-
 
 def find_connected_components(nodes):
     adjacency = {name: set(node['links_out']) for name, node in nodes.items()}
@@ -69,7 +65,6 @@ def find_connected_components(nodes):
 
     return components
 
-
 def label_propagation(nodes, adjacency, max_iter=20):
     labels = {name: i for i, name in enumerate(sorted(nodes.keys()))}
     node_list = sorted(nodes.keys())
@@ -105,7 +100,6 @@ def label_propagation(nodes, adjacency, max_iter=20):
 
     return labels
 
-
 def build_clusters(nodes):
     adjacency = {name: set(node['links_out']) for name, node in nodes.items()}
     lp = label_propagation(nodes, adjacency)
@@ -116,7 +110,6 @@ def build_clusters(nodes):
 
     return clusters, lp
 
-
 def find_bridges(nodes):
     adjacency = {name: set(node['links_out']) for name, node in nodes.items()}
     reverse_adj = defaultdict(set)
@@ -125,7 +118,6 @@ def find_bridges(nodes):
             if target in nodes:
                 reverse_adj[target].add(src)
 
-    indexed = {name: idx for idx, name in enumerate(sorted(nodes.keys()))}
     bridges = []
 
     for node in sorted(nodes.keys()):
@@ -151,7 +143,6 @@ def find_bridges(nodes):
     bridges.sort(key=lambda x: x['degree'], reverse=True)
     return bridges[:TOP_N]
 
-
 def compare_clusters_tags(nodes, clusters):
     tag_sets = {}
     for name, node in nodes.items():
@@ -176,7 +167,6 @@ def compare_clusters_tags(nodes, clusters):
     report.sort(key=lambda x: x['size'], reverse=True)
     return report
 
-
 def write_md(hubs, orphans, components, clusters, cluster_report, bridges):
     non_trivial = [c for c in components if len(c) > 1]
     giant = max(non_trivial, key=len) if non_trivial else set()
@@ -195,7 +185,7 @@ def write_md(hubs, orphans, components, clusters, cluster_report, bridges):
         f'- Мелких компонент (2–5 заметок): {len(small)}',
         f'- Изолированных (размер 1): {len([c for c in components if len(c) == 1])}',
         '',
-        '## Хабы (top-{})'.format(len(hubs)),
+        f'## Хабы (top-{len(hubs)})',
         '',
         '| # | Заметка | Degree | Out | In | Теги |',
         '|---|---------|--------|-----|----|------|',
@@ -243,7 +233,6 @@ def write_md(hubs, orphans, components, clusters, cluster_report, bridges):
 
     print(f'Written analysis to {OUTPUT_PATH}')
 
-
 def main():
     graph = load_graph()
     nodes = graph['nodes']
@@ -273,7 +262,6 @@ def main():
     print(f'Updated {GRAPH_PATH} with cluster assignments')
 
     write_md(hubs, orphans, components, clusters, cluster_report, bridges)
-
 
 if __name__ == '__main__':
     main()

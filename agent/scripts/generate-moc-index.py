@@ -18,7 +18,6 @@ CONFIG_PATH = os.path.join(PROJECT_ROOT, 'agent', 'config.json')
 MIN_LINKS = 5
 MAX_ENTRIES = 50
 
-
 def load_config():
     global MIN_LINKS
     if os.path.exists(CONFIG_PATH):
@@ -29,11 +28,9 @@ def load_config():
         except (json.JSONDecodeError, KeyError):
             pass
 
-
 def load_graph():
     with open(GRAPH_PATH, encoding='utf-8') as f:
         return json.load(f)
-
 
 def generate_index(graph):
     nodes = graph['nodes']
@@ -64,7 +61,7 @@ def generate_index(graph):
     for idx, (name, node, degree) in enumerate(hubs, 1):
         tags = ', '.join(f'`{t}`' for t in node.get('tags', [])[:3]) or '—'
         out_links = node.get('links_out', [])[:5]
-        links_str = ', '.join(f'[[{l}]]' for l in out_links)
+        links_str = ', '.join(f'[[{link_name}]]' for l in out_links)
         cluster_id = node.get('cluster', -1)
         cluster_size = len(clusters.get(str(cluster_id), []))
 
@@ -82,12 +79,10 @@ def generate_index(graph):
 
     print(f'Written MOC index ({len(hubs)} hubs) to {OUTPUT_PATH}')
 
-
 def main():
     load_config()
     graph = load_graph()
     generate_index(graph)
-
 
 if __name__ == '__main__':
     main()

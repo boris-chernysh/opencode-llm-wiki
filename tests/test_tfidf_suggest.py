@@ -13,7 +13,7 @@ subprocess.run(['python3', BUILD_SCRIPT], cwd=TEST_VAULT, capture_output=True, t
 result = subprocess.run(['python3', SUGGEST_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 assert result.returncode == 0, f"tfidf-suggest.py failed: {result.stderr}"
 
-with open(OUTPUT_PATH, 'r') as f:
+with open(OUTPUT_PATH) as f:
     content = f.read()
 
 assert 'Semantic Link Suggestions' in content, "Should have suggestions header"

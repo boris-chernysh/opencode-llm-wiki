@@ -15,7 +15,6 @@ DATA_DIR = os.path.join(PROJECT_ROOT, 'agent', 'data')
 CONFIG_PATH = os.path.join(PROJECT_ROOT, 'agent', 'config.json')
 SOURCE_DIRS = ['atoms']
 
-
 def load_config():
     global SOURCE_DIRS
     if os.path.exists(CONFIG_PATH):
@@ -25,7 +24,6 @@ def load_config():
             SOURCE_DIRS = cfg.get('source_dirs', {}).get('graph', SOURCE_DIRS)
         except (json.JSONDecodeError, KeyError):
             pass
-
 
 def parse_frontmatter(content):
     """Parse YAML-like frontmatter, return (fields_dict, body_text)."""
@@ -79,7 +77,6 @@ def parse_frontmatter(content):
 
     return fields, body
 
-
 def extract_content_wikilinks(body_text):
     """Extract [[wikilinks]] from body text (content after frontmatter)."""
     links = set()
@@ -94,14 +91,12 @@ def extract_content_wikilinks(body_text):
             links.add(target)
     return links
 
-
 def normalize_filename(name):
     """Ensure filename ends with .md, strip path separators."""
     name = name.strip().strip('/').strip('\\')
     if not name.lower().endswith('.md'):
         name += '.md'
     return name
-
 
 def build_graph():
     load_config()
@@ -198,7 +193,6 @@ def build_graph():
     print(f'Saved to {output_path}')
 
     return graph
-
 
 if __name__ == '__main__':
     build_graph()

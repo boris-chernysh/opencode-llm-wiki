@@ -13,7 +13,7 @@ import json
 import math
 import os
 import re
-from collections import Counter, defaultdict
+from collections import Counter
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -30,7 +30,6 @@ MIN_CONTENT_TOKENS = 50
 EXCLUDED_DIRS = ['daily notes']
 EXCLUDED_TAGS = {'daily-note'}
 
-
 def load_config():
     if os.path.exists(CONFIG_PATH):
         try:
@@ -44,7 +43,6 @@ def load_config():
             MIN_CONTENT_TOKENS = cfg.get('thresholds', {}).get('min_content_tokens', MIN_CONTENT_TOKENS)
         except (json.JSONDecodeError, KeyError):
             pass
-
 
 def is_excluded(fname, nodes):
     node = nodes.get(fname, {})
@@ -78,15 +76,13 @@ RUSSIAN_STOP_WORDS = {
     'достаточно', 'вообще', 'однако', 'поэтому',
 }
 
-
 def tokenize(text):
     text = text.lower()
     words = re.findall(r'[а-яёa-z0-9]{2,}', text)
     return [w for w in words if w not in RUSSIAN_STOP_WORDS]
 
-
 def build_tfidf(docs, doc_ids):
-    N = len(docs)
+    n_docs = len(docs)
     df = Counter()
     for words in docs:
         df.update(set(words))
@@ -99,7 +95,7 @@ def build_tfidf(docs, doc_ids):
         vec = {}
         total = len(words)
         for word, freq in tf.items():
-            idf = math.log(N / (df[word] + 1))
+            idf = math.log(n_docs / (df[word] + 1))
             vec[word] = (freq / total) * idf
 
         norm = math.sqrt(sum(v * v for v in vec.values()))
@@ -110,13 +106,11 @@ def build_tfidf(docs, doc_ids):
 
     return vectors
 
-
 def cosine_sim(vec_a, vec_b):
     if not vec_a or not vec_b:
         return 0.0
     dot = sum(vec_a.get(w, 0) * vec_b.get(w, 0) for w in set(vec_a) | set(vec_b))
     return dot
-
 
 def suggest(graph):
     nodes = graph['nodes']
@@ -179,7 +173,6 @@ def suggest(graph):
     suggestions.sort(key=lambda x: x['similarity'], reverse=True)
     return suggestions[:MAX_SUGGESTIONS]
 
-
 def write_md(suggestions):
     lines = [
         '---',
@@ -217,18 +210,15 @@ def write_md(suggestions):
 
     print(f'Written {len(suggestions)} suggestions to {OUTPUT_PATH}')
 
-
 def main():
     load_config()
     graph = load_graph_local()
     suggestions = suggest(graph)
     write_md(suggestions)
 
-
 def load_graph_local():
     with open(GRAPH_PATH, encoding='utf-8') as f:
         return json.load(f)
-
 
 if __name__ == '__main__':
     main()

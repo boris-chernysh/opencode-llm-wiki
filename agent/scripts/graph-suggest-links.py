@@ -9,7 +9,6 @@ are from excluded directories or have only excluded tags.
 """
 import json
 import os
-from collections import defaultdict
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -24,7 +23,6 @@ MAX_SUGGESTIONS = 50
 EXCLUDED_DIRS = ['daily notes']
 EXCLUDED_TAGS = {'daily-note'}
 
-
 def load_config():
     if os.path.exists(CONFIG_PATH):
         try:
@@ -37,7 +35,6 @@ def load_config():
         except (json.JSONDecodeError, KeyError):
             pass
 
-
 def is_excluded(fname, nodes):
     node = nodes.get(fname, {})
     source_dir = node.get('source_dir', '')
@@ -48,18 +45,15 @@ def is_excluded(fname, nodes):
         return True
     return False
 
-
 def load_graph():
     with open(GRAPH_PATH, encoding='utf-8') as f:
         return json.load(f)
-
 
 def jaccard(neighbors_a, neighbors_b):
     union = neighbors_a | neighbors_b
     if not union:
         return 0.0
     return len(neighbors_a & neighbors_b) / len(union)
-
 
 def suggest(graph):
     nodes = graph['nodes']
@@ -107,7 +101,6 @@ def suggest(graph):
     suggestions.sort(key=lambda x: (x['common'], x['jaccard']), reverse=True)
     return suggestions[:MAX_SUGGESTIONS]
 
-
 def write_md(suggestions, stats):
     lines = [
         '---',
@@ -146,13 +139,11 @@ def write_md(suggestions, stats):
 
     print(f'Written {len(suggestions)} suggestions to {OUTPUT_PATH}')
 
-
 def main():
     load_config()
     graph = load_graph()
     suggestions = suggest(graph)
     write_md(suggestions, graph['stats'])
-
 
 if __name__ == '__main__':
     main()

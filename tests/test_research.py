@@ -14,7 +14,7 @@ subprocess.run(['python3', os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-t
 tags_dir = os.path.join(TEST_VAULT, 'agent', 'tags')
 zdorovie_path = os.path.join(tags_dir, 'здоровье.md')
 if os.path.exists(zdorovie_path):
-    with open(zdorovie_path, 'r') as f:
+    with open(zdorovie_path) as f:
         content = f.read()
     if not content.startswith('---'):
         new_content = '---\ndescription: Всё о здоровье: питание, спорт, медитация, ЗОЖ.\n---\n\n' + content
@@ -26,7 +26,7 @@ subprocess.run(['python3', os.path.join(TEST_VAULT, 'agent', 'scripts', 'generat
 
 # Read tags-index.md and search for topic
 tags_index_path = os.path.join(TEST_VAULT, 'agent', 'tags-index.md')
-with open(tags_index_path, 'r') as f:
+with open(tags_index_path) as f:
     ti_content = f.read()
 
 # Search for "здоровье" in tags-index
@@ -40,7 +40,7 @@ ts = datetime.datetime.now().strftime('%Y%m%d%H%M')
 research_file = os.path.join(research_dir, f'{ts} Test Research.md')
 
 # Simulate research output schema
-content = f"""---
+content = """---
 topic: тестовое исследование
 date: {datetime.date.today().isoformat()}
 tags:
@@ -73,7 +73,7 @@ with open(research_file, 'w') as f:
     f.write(content)
 
 # Verify output schema
-with open(research_file, 'r') as f:
+with open(research_file) as f:
     saved = f.read()
 
 assert 'topic:' in saved, "Should have topic field"
@@ -87,4 +87,4 @@ assert 'Источники' in saved, "Should have Источники section"
 # Verify wikilinks in sources
 assert '[[' in saved.split('Источники')[1], "Sources should contain wikilinks"
 
-print(f"PASS: test_research — topic search + output schema validated")
+print("PASS: test_research — topic search + output schema validated")

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Test wiki-lint: 7 categories of health checks."""
-import sys
 import os
 import subprocess
-import json
+import sys
+
 
 TEST_VAULT = sys.argv[1]
 INDEX_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')
@@ -42,16 +42,16 @@ assert missing_desc >= 0, "Should count missing descriptions"
 
 # 4) Graph orphans: read graph-stats.md
 stats_path = os.path.join(TEST_VAULT, 'agent', 'data', 'graph-stats.md')
-with open(stats_path, 'r') as f:
+with open(stats_path) as f:
     stats_content = f.read()
-orphan_line = [l for l in stats_content.split('\n') if 'Сироты' in l or 'Всего:' in l]
+orphan_line = [l for line in stats_content.split('\n') if 'Сироты' in l or 'Всего:' in l]
 assert orphan_line, "Should report orphans"
 
 # 5) Artifact consistency: tags dir count vs tags-index entries
 tags_index_path = os.path.join(TEST_VAULT, 'agent', 'tags-index.md')
-with open(tags_index_path, 'r') as f:
+with open(tags_index_path) as f:
     ti_content = f.read()
-ti_entries = len([l for l in ti_content.split('\n') if l.startswith('- #')])
+ti_entries = len([l for line in ti_content.split('\n') if line.startswith('- #')])
 tag_files_count = len([f for f in os.listdir(tags_dir) if f.endswith('.md')])
 # Not all tags have descriptions, so entries may be fewer
 assert ti_entries <= tag_files_count, f"tags-index entries ({ti_entries}) > tag files ({tag_files_count})"
@@ -71,4 +71,4 @@ for fname in os.listdir(os.path.join(TEST_VAULT, 'atoms')):
         # Single link without wikilink format is OK (string value)
         pass
 
-print(f"PASS: test_lint — 7 health checks passed")
+print("PASS: test_lint — 7 health checks passed")

@@ -17,7 +17,7 @@ tags_dir = os.path.join(TEST_VAULT, 'agent', 'tags')
 for tag_file in sorted(os.listdir(tags_dir)):
     if tag_file == 'здоровье.md':
         tag_path = os.path.join(tags_dir, tag_file)
-        with open(tag_path, 'r') as f:
+        with open(tag_path) as f:
             content = f.read()
         if not content.startswith('---'):
             new_content = '---\ndescription: Всё о здоровье: питание, спорт, медитация, ЗОЖ.\n---\n\n' + content
@@ -28,7 +28,7 @@ for tag_file in sorted(os.listdir(tags_dir)):
 result2 = subprocess.run(['python3', GEN_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 assert result2.returncode == 0, f"generate-tags-index.py failed: {result2.stderr}"
 
-with open(INDEX_PATH, 'r') as f:
+with open(INDEX_PATH) as f:
     content = f.read()
 
 lines = [l for l in content.split('\n') if l.startswith('- #')]

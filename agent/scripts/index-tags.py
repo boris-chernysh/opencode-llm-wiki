@@ -10,7 +10,6 @@ CONFIG_PATH = os.path.join(PROJECT_ROOT, 'agent', 'config.json')
 SOURCE_DIRS = ['atoms', 'daily notes']
 EXCLUDED_TAGS = {'need-processing', 'daily-note'}
 
-
 def load_config():
     global SOURCE_DIRS, EXCLUDED_TAGS
     if os.path.exists(CONFIG_PATH):
@@ -22,14 +21,12 @@ def load_config():
         except (json.JSONDecodeError, KeyError):
             pass
 
-
 def is_valid_tag(tag):
     if re.match(r'^\d', tag):
         return False
     if re.match(r'^[0-9a-fA-F]{3,8}$', tag):
         return False
     return True
-
 
 def parse_frontmatter_tags(lines):
     tags = set()
@@ -54,7 +51,6 @@ def parse_frontmatter_tags(lines):
         elif in_list and stripped and not stripped.startswith('-'):
             in_list = False
     return tags
-
 
 def extract_tags(filepath):
     tags = set()
@@ -83,7 +79,6 @@ def extract_tags(filepath):
 
     return tags
 
-
 def get_existing_description(index_path):
     if not os.path.exists(index_path):
         return None
@@ -97,7 +92,6 @@ def get_existing_description(index_path):
                 if line.startswith('description:'):
                     return line.split(':', 1)[1].strip()
     return None
-
 
 def build_index():
     tag_to_files = {}
@@ -153,7 +147,6 @@ def build_index():
         print(f'Removed stale index: {stale}')
 
     print(f'Indexed {len(tag_to_files)} tags across {len(written_files)} files.')
-
 
 if __name__ == '__main__':
     load_config()

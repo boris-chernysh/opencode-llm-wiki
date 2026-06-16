@@ -15,7 +15,7 @@ subprocess.run(['python3', os.path.join(TEST_VAULT, 'agent', 'scripts', 'graph-a
 
 # Read graph to check cluster structure
 graph_path = os.path.join(TEST_VAULT, 'agent', 'data', 'links-graph.json')
-with open(graph_path, 'r') as f:
+with open(graph_path) as f:
     graph = json.load(f)
 
 clusters = graph.get('clusters', {})
@@ -42,7 +42,7 @@ for label, members in clusters.items():
 moc_path = os.path.join(TEST_VAULT, 'agent', 'moc-index.md')
 assert os.path.exists(moc_path), "moc-index.md should exist"
 
-with open(moc_path, 'r') as f:
+with open(moc_path) as f:
     moc_content = f.read()
 assert 'MOC index' in moc_content, "Should have MOC index header"
 

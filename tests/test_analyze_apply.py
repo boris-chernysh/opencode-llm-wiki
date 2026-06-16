@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test wiki-analyze apply: link merge, dedup, preserve existing."""
-import sys
 import os
-import re
+import sys
+
 
 TEST_VAULT = sys.argv[1]
 atoms_dir = os.path.join(TEST_VAULT, 'atoms')
@@ -56,7 +56,7 @@ def parse_frontmatter(content):
 def add_link_to_frontmatter(content, target):
     """Simulate adding a link to links: frontmatter field."""
     fields, body = parse_frontmatter(content)
-    
+
     existing = []
     if 'links' in fields:
         raw = fields['links']
@@ -64,12 +64,12 @@ def add_link_to_frontmatter(content, target):
             existing = raw
         elif isinstance(raw, str):
             existing = [raw]
-    
+
     new_link = f'[[{target}]]'
     if new_link not in existing:
         existing.append(new_link)
     fields['links'] = existing
-    
+
     lines = ['---']
     for key, val in fields.items():
         if key == 'links':
@@ -91,7 +91,7 @@ def add_link_to_frontmatter(content, target):
 
 # Test 1: Add link to note with list links
 note_path = os.path.join(atoms_dir, '202501010003 Бег по утрам.md')
-with open(note_path, 'r') as f:
+with open(note_path) as f:
     original = f.read()
 
 fields, body = parse_frontmatter(original)
@@ -108,11 +108,11 @@ assert len(new_fields['links']) == original_link_count + 1, \
 new_content2 = add_link_to_frontmatter(new_content, '202501010004 Медитация')
 new_fields2, _ = parse_frontmatter(new_content2)
 assert len(new_fields2['links']) == len(new_fields['links']), \
-    f"Should not add duplicate link"
+    "Should not add duplicate link"
 
 # Test 3: Note with no links field
 note_path2 = os.path.join(atoms_dir, '202501010001 Здоровое питание.md')
-with open(note_path2, 'r') as f:
+with open(note_path2) as f:
     original2 = f.read()
 
 fields2, _ = parse_frontmatter(original2)
@@ -124,4 +124,4 @@ assert 'links' in new_fields3, "Should create links field"
 # Note: our simplified function doesn't handle absent field well in write-back
 # but the main logic of merging is correct
 
-print(f"PASS: test_analyze_apply — link merge, dedup, and absent-field handling")
+print("PASS: test_analyze_apply — link merge, dedup, and absent-field handling")
