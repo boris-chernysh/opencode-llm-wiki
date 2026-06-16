@@ -1,8 +1,10 @@
-#!/usr/bin/env python3
-"""Test wiki-research: search in tags-index, output schema."""
-import sys
+import datetime
 import os
 import subprocess
+import sys
+
+#!/usr/bin/env python3
+"""Test wiki-research: search in tags-index, output schema."""
 
 TEST_VAULT = sys.argv[1]
 
@@ -35,7 +37,7 @@ assert 'здоровье' in ti_content.lower(), "tags-index should contain зд
 # Create a research output file
 research_dir = os.path.join(TEST_VAULT, 'agent', 'research')
 os.makedirs(research_dir, exist_ok=True)
-import datetime
+
 ts = datetime.datetime.now().strftime('%Y%m%d%H%M')
 research_file = os.path.join(research_dir, f'{ts} Test Research.md')
 

@@ -1,14 +1,16 @@
+import os
+import subprocess
+import sys
+
 #!/usr/bin/env python3
 """Test wiki-process-note: keyword extraction, tag matching, candidate scoring."""
-import sys
-import os
 
 TEST_VAULT = sys.argv[1]
 TAGS_INDEX_PATH = os.path.join(TEST_VAULT, 'agent', 'tags-index.md')
 TAGS_DIR = os.path.join(TEST_VAULT, 'agent', 'tags')
 
 # Run index-tags.py first
-import subprocess
+
 subprocess.run(['python3', os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')],
                cwd=TEST_VAULT, capture_output=True, text=True)
 subprocess.run(['python3', os.path.join(TEST_VAULT, 'agent', 'scripts', 'generate-tags-index.py')],

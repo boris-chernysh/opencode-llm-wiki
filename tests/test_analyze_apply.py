@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
-"""Test wiki-analyze apply: link merge, dedup, preserve existing."""
 import os
 import sys
+
+#!/usr/bin/env python3
+"""Test wiki-analyze apply: link merge, dedup, preserve existing."""
 
 
 TEST_VAULT = sys.argv[1]

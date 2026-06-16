@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
-"""Test generate-tags-index.py: entries count, descriptions."""
-import sys
 import os
 import subprocess
+import sys
+
+#!/usr/bin/env python3
+"""Test generate-tags-index.py: entries count, descriptions."""
 
 TEST_VAULT = sys.argv[1]
 INDEX_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')
@@ -31,7 +32,7 @@ assert result2.returncode == 0, f"generate-tags-index.py failed: {result2.stderr
 with open(INDEX_PATH) as f:
     content = f.read()
 
-lines = [l for l in content.split('\n') if l.startswith('- #')]
+lines = [line for line in content.split('\n') if line.startswith('- #')]
 assert len(lines) > 0, "tags-index.md should have entries"
 
 assert 'здоровье' in content, f"Expected здоровье in tags-index.md: {content[:500]}"

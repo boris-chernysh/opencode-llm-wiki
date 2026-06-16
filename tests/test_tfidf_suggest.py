@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
-"""Test tfidf-suggest.py: similarity > threshold, daily excluded, <1500 cap."""
-import sys
 import os
 import subprocess
+import sys
+
+#!/usr/bin/env python3
+"""Test tfidf-suggest.py: similarity > threshold, daily excluded, <1500 cap."""
 
 TEST_VAULT = sys.argv[1]
 BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
@@ -19,9 +20,9 @@ with open(OUTPUT_PATH) as f:
 assert 'Semantic Link Suggestions' in content, "Should have suggestions header"
 
 # Count suggestions
-lines = [l for l in content.split('\n') if l.startswith('| ') and '|' in l[2:]]
+lines = [line for line in content.split('\n') if line.startswith('| ') and '|' in line[2:]]
 # Filter header and separator
-data_lines = [l for l in lines if not l.startswith('| #') and not l.startswith('|---')]
+data_lines = [line for line in lines if not line.startswith('| #') and not line.startswith('|---')]
 assert len(data_lines) <= 50, f"Should be ≤ 50 suggestions, got {len(data_lines)}"
 
 # Daily notes should NOT appear

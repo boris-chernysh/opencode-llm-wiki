@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-"""eval-harness.py — AI eval runner for llm-wiki skill.
-
-Запускает opencode с заданным vault + SKILL.md, проверяет контракт поведения агента.
-Требует: opencode CLI с настроенным LLM-провайдером.
-
-Каждый сценарий прогоняется 3 раза. Успех = ≥ 2/3 прохождений.
-"""
 from glob import glob
 import os
 import re
@@ -14,6 +6,23 @@ import subprocess
 import sys
 import tempfile
 import yaml
+
+#!/usr/bin/env python3
+"""eval-harness.py — AI eval runner for llm-wiki skill.
+
+Запускает opencode с заданным vault + SKILL.md, проверяет контракт поведения агента.
+Требует: opencode CLI с настроенным LLM-провайдером.
+
+Каждый сценарий прогоняется 3 раза. Успех = ≥ 2/3 прохождений.
+"""
+
+
+
+
+
+
+
+
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -318,9 +327,15 @@ def main():
     create_templates_vault()
 
     # Check if opencode CLI is available
+    has_opencode = False
     try:
         subprocess.run(['opencode', '--version'], capture_output=True, timeout=5)
-        except (FileNotFoundError, subprocess.TimeoutExpired):
+        has_opencode = True
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+
+    if not has_opencode:
+        print("⚠ opencode CLI not found — eval will run as dry-run (static checks only)\n")
 
     scenario_files = sorted(glob(os.path.join(SCENARIOS_DIR, '*.yaml')))
     if not scenario_files:

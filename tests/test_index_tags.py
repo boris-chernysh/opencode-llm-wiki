@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
-"""Test index-tags.py: tag indexing, hex filter, exclusion, stale removal."""
 import os
 import subprocess
 import sys
+
+#!/usr/bin/env python3
+"""Test index-tags.py: tag indexing, hex filter, exclusion, stale removal."""
 
 
 TEST_VAULT = sys.argv[1]

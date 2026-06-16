@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
-"""Test graph-suggest-links.py: Jaccard > 0, shared neighbors, max 50."""
 import os
 import subprocess
 import sys
+
+#!/usr/bin/env python3
+"""Test graph-suggest-links.py: Jaccard > 0, shared neighbors, max 50."""
 
 
 TEST_VAULT = sys.argv[1]

@@ -1,9 +1,11 @@
+import json
+import os
+import re
+import subprocess
+import sys
+
 #!/usr/bin/env python3
 """Test generate-moc-index.py: hubs sorted by degree, existing files."""
-import sys
-import os
-import subprocess
-import json
 
 TEST_VAULT = sys.argv[1]
 BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
@@ -22,7 +24,7 @@ with open(MOC_PATH) as f:
 assert 'MOC index' in content, "Should have MOC index header"
 
 # Check all linked notes exist
-import re
+
 wikilinks = re.findall(r'\[\[([^\]]+)\]\]', content)
 graph_path = os.path.join(TEST_VAULT, 'agent', 'data', 'links-graph.json')
 with open(graph_path) as f:

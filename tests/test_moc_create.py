@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
-"""Test wiki-moc create: cluster identification, MOC file validation."""
-import sys
+import json
 import os
 import subprocess
-import json
+import sys
+
+#!/usr/bin/env python3
+"""Test wiki-moc create: cluster identification, MOC file validation."""
 
 TEST_VAULT = sys.argv[1]
 

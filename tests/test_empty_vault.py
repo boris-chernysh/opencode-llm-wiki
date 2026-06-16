@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Regression: all scripts run on empty vault without crashing."""
+import json
 import os
 import shutil
 import subprocess
 import tempfile
-
 
 # Create empty vault
 empty_vault = tempfile.mkdtemp(prefix='test-empty-vault-')
@@ -44,7 +44,6 @@ try:
     if os.path.exists(data_dir):
         links_graph = os.path.join(data_dir, 'links-graph.json')
         if os.path.exists(links_graph):
-            import json
             with open(links_graph) as f:
                 graph = json.load(f)
             assert graph['stats']['total_nodes'] == 0, "Empty vault should have 0 nodes"

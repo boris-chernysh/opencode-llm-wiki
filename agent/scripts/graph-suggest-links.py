@@ -1,3 +1,6 @@
+import json
+import os
+
 #!/usr/bin/env python3
 """Generate link suggestions from the graph using Common Neighbors and Jaccard.
 
@@ -7,8 +10,8 @@ and writes agent/data/link-suggestions.md.
 Filters out daily-notes noise: excludes pairs where both notes
 are from excluded directories or have only excluded tags.
 """
-import json
-import os
+
+
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

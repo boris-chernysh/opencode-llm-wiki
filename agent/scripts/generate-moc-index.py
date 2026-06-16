@@ -1,12 +1,16 @@
+from collections import defaultdict
+import json
+import os
+
 #!/usr/bin/env python3
 """Generate MOC (Map of Content) index from hub notes.
 
 Scans atoms/ for notes with `links:` frontmatter field,
 identifies hub notes (high out-degree), and generates agent/moc-index.md.
 """
-import json
-import os
-from collections import defaultdict
+
+
+
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -61,7 +65,7 @@ def generate_index(graph):
     for idx, (name, node, degree) in enumerate(hubs, 1):
         tags = ', '.join(f'`{t}`' for t in node.get('tags', [])[:3]) or '—'
         out_links = node.get('links_out', [])[:5]
-        links_str = ', '.join(f'[[{link_name}]]' for l in out_links)
+        links_str = ', '.join(f'[[{link_name}]]' for link_name in out_links)
         cluster_id = node.get('cluster', -1)
         cluster_size = len(clusters.get(str(cluster_id), []))
 

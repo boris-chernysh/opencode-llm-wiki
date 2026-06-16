@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
-"""Test build-links-graph.py: nodes, edges, links_in/out consistency."""
 import json
 import os
 import subprocess
 import sys
+
+#!/usr/bin/env python3
+"""Test build-links-graph.py: nodes, edges, links_in/out consistency."""
 
 
 TEST_VAULT = sys.argv[1]

@@ -1,12 +1,16 @@
+from collections import defaultdict, deque
+import json
+import os
+
 #!/usr/bin/env python3
 """Analyze the link graph: hubs, orphans, bridges, clusters.
 
 Loads agent/data/links-graph.json, performs graph analysis,
 and writes agent/data/graph-stats.md.
 """
-import json
-import os
-from collections import defaultdict, deque
+
+
+
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

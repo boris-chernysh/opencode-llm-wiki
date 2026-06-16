@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
-"""Test graph-analyze.py: clusters, hubs, orphans."""
 import os
 import subprocess
 import sys
+
+#!/usr/bin/env python3
+"""Test graph-analyze.py: clusters, hubs, orphans."""
 
 
 TEST_VAULT = sys.argv[1]

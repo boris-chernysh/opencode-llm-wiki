@@ -1,8 +1,10 @@
-#!/usr/bin/env python3
-"""Test wiki-lint: 7 categories of health checks."""
 import os
+import re
 import subprocess
 import sys
+
+#!/usr/bin/env python3
+"""Test wiki-lint: 7 categories of health checks."""
 
 
 TEST_VAULT = sys.argv[1]
@@ -44,7 +46,7 @@ assert missing_desc >= 0, "Should count missing descriptions"
 stats_path = os.path.join(TEST_VAULT, 'agent', 'data', 'graph-stats.md')
 with open(stats_path) as f:
     stats_content = f.read()
-orphan_line = [l for line in stats_content.split('\n') if 'Сироты' in l or 'Всего:' in l]
+orphan_line = [line for line in stats_content.split('\n') if 'Сироты' in line or 'Всего:' in line]
 assert orphan_line, "Should report orphans"
 
 # 5) Artifact consistency: tags dir count vs tags-index entries
@@ -61,7 +63,7 @@ assert ti_entries <= tag_files_count, f"tags-index entries ({ti_entries}) > tag 
 
 # 7) Malformed links: check frontmatter links use wikilink format
 # Spot-check: build-links-graph already extracts links properly
-import re
+
 for fname in os.listdir(os.path.join(TEST_VAULT, 'atoms')):
     if not fname.endswith('.md'):
         continue
