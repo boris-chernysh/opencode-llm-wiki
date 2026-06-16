@@ -1,12 +1,3 @@
-from glob import glob
-import os
-import re
-import shutil
-import subprocess
-import sys
-import tempfile
-import yaml
-
 #!/usr/bin/env python3
 """eval-harness.py — AI eval runner for llm-wiki skill.
 
@@ -15,6 +6,14 @@ import yaml
 
 Каждый сценарий прогоняется 3 раза. Успех = ≥ 2/3 прохождений.
 """
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import yaml
+from glob import glob
 
 
 

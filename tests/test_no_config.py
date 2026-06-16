@@ -1,11 +1,9 @@
+#!/usr/bin/env python3
+"""Regression: all scripts use defaults without config.json."""
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
-
-#!/usr/bin/env python3
-"""Regression: all scripts use defaults without config.json."""
 
 # Create vault with minimal content
 vault = tempfile.mkdtemp(prefix='test-noconfig-')

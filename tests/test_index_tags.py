@@ -32,7 +32,7 @@ assert 'спорт' in tag_names, f"спорт missing, got {tag_names}"
 assert 'python' in tag_names, f"python missing, got {tag_names}"
 
 # Check здоровье.md contains correct notes
-with open(os.path.join(TAGS_DIR, 'здоровье.md'), 'r') as f:
+with open(os.path.join(TAGS_DIR, 'здоровье.md')) as f:
     content = f.read()
 assert 'Здоровое питание' in content
 assert 'Спорт и тренировки' in content

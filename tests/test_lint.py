@@ -1,10 +1,8 @@
-import os
-import re
-import subprocess
-import sys
-
 #!/usr/bin/env python3
 """Test wiki-lint: 7 categories of health checks."""
+import os
+import subprocess
+import sys
 
 
 TEST_VAULT = sys.argv[1]
@@ -32,7 +30,7 @@ missing_desc = 0
 for f in os.listdir(tags_dir):
     if not f.endswith('.md'):
         continue
-    with open(os.path.join(tags_dir, f), 'r') as fh:
+    with open(os.path.join(tags_dir, f)) as fh:
         content = fh.read()
     if not content.startswith('---'):
         missing_desc += 1
@@ -53,7 +51,7 @@ assert orphan_line, "Should report orphans"
 tags_index_path = os.path.join(TEST_VAULT, 'agent', 'tags-index.md')
 with open(tags_index_path) as f:
     ti_content = f.read()
-ti_entries = len([l for line in ti_content.split('\n') if line.startswith('- #')])
+ti_entries = len([line for line in ti_content.split('\n') if line.startswith('- #')])
 tag_files_count = len([f for f in os.listdir(tags_dir) if f.endswith('.md')])
 # Not all tags have descriptions, so entries may be fewer
 assert ti_entries <= tag_files_count, f"tags-index entries ({ti_entries}) > tag files ({tag_files_count})"
@@ -67,7 +65,7 @@ assert ti_entries <= tag_files_count, f"tags-index entries ({ti_entries}) > tag 
 for fname in os.listdir(os.path.join(TEST_VAULT, 'atoms')):
     if not fname.endswith('.md'):
         continue
-    with open(os.path.join(TEST_VAULT, 'atoms', fname), 'r') as f:
+    with open(os.path.join(TEST_VAULT, 'atoms', fname)) as f:
         content = f.read()
     if 'links:' in content and '[[' not in content.split('links:')[1].split('\n')[0]:
         # Single link without wikilink format is OK (string value)

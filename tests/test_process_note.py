@@ -50,7 +50,7 @@ need_proc_notes = []
 for f in sorted(os.listdir(atoms_dir)):
     if not f.endswith('.md'):
         continue
-    with open(os.path.join(atoms_dir, f), 'r') as fh:
+    with open(os.path.join(atoms_dir, f)) as fh:
         content = fh.read()
     if 'need-processing' in content.lower():
         need_proc_notes.append(f)

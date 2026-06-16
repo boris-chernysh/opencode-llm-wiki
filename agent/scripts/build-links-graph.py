@@ -1,14 +1,13 @@
-from collections import defaultdict
-import json
-import os
-import re
-
 #!/usr/bin/env python3
 """Build a link graph from Obsidian vault notes.
 
 Extracts `links` frontmatter field and `[[wikilinks]]` from body,
 builds an adjacency graph, and writes agent/data/links-graph.json.
 """
+import json
+import os
+import re
+from collections import defaultdict
 
 
 

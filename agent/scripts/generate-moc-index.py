@@ -1,13 +1,12 @@
-from collections import defaultdict
-import json
-import os
-
 #!/usr/bin/env python3
 """Generate MOC (Map of Content) index from hub notes.
 
 Scans atoms/ for notes with `links:` frontmatter field,
 identifies hub notes (high out-degree), and generates agent/moc-index.md.
 """
+import json
+import os
+from collections import defaultdict
 
 
 

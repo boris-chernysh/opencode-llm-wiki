@@ -1,9 +1,3 @@
-from collections import Counter
-import json
-import math
-import os
-import re
-
 #!/usr/bin/env python3
 """TF-IDF semantic link suggestions.
 
@@ -15,6 +9,11 @@ Writes agent/data/semantic-suggestions.md.
 Filters out daily-notes noise: excludes pairs where both notes
 are from excluded directories or have only excluded tags.
 """
+import json
+import math
+import os
+import re
+from collections import Counter
 
 
 

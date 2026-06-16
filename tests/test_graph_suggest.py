@@ -21,7 +21,7 @@ with open(SUGGEST_PATH) as f:
 assert 'Link Suggestions' in content, "Should have suggestions header"
 
 # Count suggestions in the table
-lines = [l for line in content.split('\n') if line.startswith('| ') and line.count('|') >= 5 and not line.startswith('| #') and not line.startswith('|---')]
+lines = [line for line in content.split('\n') if line.startswith('| ') and line.count('|') >= 5 and not line.startswith('| #') and not line.startswith('|---')]
 assert len(lines) <= 50, f"Should be ≤ 50 suggestions, got {len(lines)}"
 
 # Daily notes should not appear in suggestions (both notes excluded)
