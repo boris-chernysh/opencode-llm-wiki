@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from glob import glob
 
 
@@ -175,21 +176,25 @@ def run_opencode(vault_path, command, user_response=None):
     """
     cmd = ['opencode', 'run', '--dir', vault_path, '--command', command,
            '--dangerously-skip-permissions']
-    try:
-        result = subprocess.run(
-            cmd,
-            input=user_response,
-            capture_output=True,
-            text=True,
-            timeout=300
-        )
-        return result.stdout, result.stderr, result.returncode
-    except FileNotFoundError:
-        return None, "opencode CLI not found", -1
-    except subprocess.TimeoutExpired:
-        return None, f"Timeout after {300}s", -1
-    except Exception as e:
-        return None, str(e), -1
+    for attempt in range(2):
+        try:
+            result = subprocess.run(
+                cmd,
+                input=user_response,
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
+            if result.returncode == 0 or 'UnknownError' not in (result.stderr or ''):
+                return result.stdout, result.stderr, result.returncode
+            # Retry on UnknownError
+            if attempt == 0:
+                time.sleep(2)
+        except subprocess.TimeoutExpired:
+            return None, f"Timeout after {300}s", -1
+        except Exception as e:
+            return None, str(e), -1
+    return None, "opencode CLI not found", -1
 
 def check_scenario(scenario, vault_path):
     """Run scenario checks against the vault."""
@@ -271,7 +276,8 @@ def check_scenario(scenario, vault_path):
                     with open(path) as f:
                         content = f.read()
                     count = content.count(check['text'])
-                    ok = count <= check['max']
+                    max_val = int(check['max']) if isinstance(check['max'], str) else check['max']
+                    ok = count <= max_val
                 else:
                     ok = False
             elif check_type == 'dir_content_contains':
@@ -511,7 +517,6 @@ def main():
         ok = run_scenario(sf)
         results[os.path.basename(sf)] = ok
         # Delay between scenarios to avoid opencode state issues
-        import time
         time.sleep(2)
 
     total = len(results)
