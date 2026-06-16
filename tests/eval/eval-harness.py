@@ -12,18 +12,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import yaml
-
 from glob import glob
 
-
-
-
-
-
-
-
-
+import yaml
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

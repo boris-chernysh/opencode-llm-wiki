@@ -7,12 +7,7 @@ builds an adjacency graph, and writes agent/data/links-graph.json.
 import json
 import os
 import re
-
 from collections import defaultdict
-
-
-
-
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

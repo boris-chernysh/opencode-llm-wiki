@@ -13,13 +13,7 @@ import json
 import math
 import os
 import re
-
 from collections import Counter
-
-
-
-
-
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

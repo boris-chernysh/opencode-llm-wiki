@@ -6,11 +6,7 @@ identifies hub notes (high out-degree), and generates agent/moc-index.md.
 """
 import json
 import os
-
 from collections import defaultdict
-
-
-
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
