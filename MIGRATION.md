@@ -28,8 +28,8 @@ git pull
 The script handles:
 - Preserving custom `agent/config.json` settings into `wiki/config.json` with new fields
 - Renaming `wiki-process-note` → `wiki-ingest` in `.opencode/opencode.json`
-- Removing old `agent/` directory
-- Running `setup.sh` to install the new version
+- Renaming `agent/` → `wiki/` (preserves existing `tags/`, `data/`, `research/` — only stale scripts are removed)
+- Running `setup.sh` to install fresh scripts
 
 ### Manual steps
 
@@ -40,11 +40,14 @@ cd /path/to/vault
 git add -A && git commit -m "backup before llm-wiki migration"
 ```
 
-#### Step 2: Remove old `agent/` directory
+#### Step 2: Rename `agent/` → `wiki/`
 
 ```bash
-rm -rf /path/to/vault/agent/
+rm -rf /path/to/vault/agent/scripts/
+mv /path/to/vault/agent /path/to/vault/wiki
 ```
+
+This preserves existing `tags/`, `data/`, and `research/` — only stale scripts with old `agent` paths are removed.
 
 #### Step 3: Pull the new version
 

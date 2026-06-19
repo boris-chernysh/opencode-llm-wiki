@@ -9,51 +9,31 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=== Миграция llm-wiki v0.1.0 → v0.2.0 ==="
 
-# ---- 1. Migrate config.json ----
+# ---- 1. Save user config overrides (before setup.sh overwrites) ----
 if [ -f "$VAULT/agent/config.json" ]; then
-    echo "▸ Перенос agent/config.json → wiki/config.json (сохраняю пользовательские значения)..."
+    echo "▸ Сохранение пользовательских настроек из agent/config.json..."
     python3 -c "
-import json, os
+import json
 
-old_path = '$VAULT/agent/config.json'
-new_path = '$VAULT/wiki/config.json'
-
-with open(old_path) as f:
+with open('$VAULT/agent/config.json') as f:
     old = json.load(f)
 
-# Load new defaults (shipped with this version)
-if os.path.exists(new_path):
-    with open(new_path) as f:
-        new = json.load(f)
-else:
-    with open('$SCRIPT_DIR/wiki/config.json') as f:
-        new = json.load(f)
+# Keep only user-modifiable sections
+saved = {}
+if 'thresholds' in old:
+    saved['thresholds'] = old['thresholds']
+if 'exclude' in old:
+    saved['exclude'] = old['exclude']
+if 'source_dirs' in old:
+    saved['source_dirs'] = old['source_dirs']
 
-# Preserve user's threshold overrides
-for k, v in old.get('thresholds', {}).items():
-    new.setdefault('thresholds', {})[k] = v
-
-# Preserve user's exclude lists (dedup with new defaults)
-for k, v in old.get('exclude', {}).items():
-    if k in new.get('exclude', {}):
-        merged = list(dict.fromkeys(v + new['exclude'][k]))
-        new['exclude'][k] = merged
-    else:
-        new.setdefault('exclude', {})[k] = v
-
-# Preserve user's source_dirs
-for k, v in old.get('source_dirs', {}).items():
-    new.setdefault('source_dirs', {})[k] = v
-
-# Ensure new fields exist
-new.setdefault('exclude', {}).setdefault('tags_from_analyze', ['daily-note'])
-
-with open(new_path, 'w') as f:
-    json.dump(new, f, indent=2, ensure_ascii=False)
+with open('/tmp/llm-wiki-migrate-config.json', 'w') as f:
+    json.dump(saved, f, indent=2, ensure_ascii=False)
 print('OK')
 "
 else
-    echo "▸ agent/config.json не найден — пропускаю миграцию конфига."
+    echo "▸ agent/config.json не найден — пропускаю."
+    echo '{}' > /tmp/llm-wiki-migrate-config.json
 fi
 
 # ---- 2. Rename command in .opencode/opencode.json ----
@@ -76,21 +56,63 @@ else:
 "
 fi
 
-# ---- 3. Remove old agent/ directory ----
-if [ -d "$VAULT/agent" ]; then
-    echo "▸ Удаление agent/..."
-    rm -rf "$VAULT/agent"
+# ---- 3. Delete stale scripts (old code with 'agent' paths) ----
+if [ -d "$VAULT/agent/scripts" ]; then
+    echo "▸ Удаление старых скриптов agent/scripts/..."
+    rm -rf "$VAULT/agent/scripts"
     echo "OK"
 fi
 
-# ---- 4. Run setup with new structure ----
+# ---- 4. Rename agent/ → wiki/ (preserves tags/, data/, research/) ----
+if [ -d "$VAULT/agent" ]; then
+    echo "▸ Переименование agent/ → wiki/"
+    mv "$VAULT/agent" "$VAULT/wiki"
+    echo "OK"
+fi
+
+# ---- 5. Run setup with fresh scripts ----
 echo "▸ Запуск setup.sh..."
 bash "$SCRIPT_DIR/setup.sh" "$VAULT" "$MODE"
+
+# ---- 6. Restore merged config (setup.sh overwrites config.json) ----
+echo "▸ Восстановление пользовательских настроек..."
+python3 -c "
+import json, os
+
+with open('/tmp/llm-wiki-migrate-config.json') as f:
+    saved = json.load(f)
+
+config_path = '$VAULT/wiki/config.json'
+with open(config_path) as f:
+    new = json.load(f)
+
+# Apply saved user overrides
+for k, v in saved.get('thresholds', {}).items():
+    new.setdefault('thresholds', {})[k] = v
+
+for k, v in saved.get('exclude', {}).items():
+    if k in new.get('exclude', {}):
+        merged = list(dict.fromkeys(v + new['exclude'][k]))
+        new['exclude'][k] = merged
+    else:
+        new.setdefault('exclude', {})[k] = v
+
+for k, v in saved.get('source_dirs', {}).items():
+    new.setdefault('source_dirs', {})[k] = v
+
+# Ensure new fields exist
+new.setdefault('exclude', {}).setdefault('tags_from_analyze', ['daily-note'])
+
+with open(config_path, 'w') as f:
+    json.dump(new, f, indent=2, ensure_ascii=False)
+print('OK')
+"
+rm -f /tmp/llm-wiki-migrate-config.json
 
 echo ""
 echo "=== Миграция завершена ==="
 echo "Что изменилось:"
-echo "  • agent/      → wiki/"
+echo "  • agent/      → wiki/ (теги, данные, исследования сохранены)"
 echo "  • wiki-process-note → wiki-ingest"
 echo "  • wiki-moc теперь read-only (индекс без создания MOC-заметок)"
 echo "  • wiki/config.json — добавлено exclude.tags_from_analyze"
