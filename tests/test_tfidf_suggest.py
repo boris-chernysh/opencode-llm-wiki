@@ -6,9 +6,9 @@ import sys
 """Test tfidf-suggest.py: similarity > threshold, daily excluded, <1500 cap."""
 
 TEST_VAULT = sys.argv[1]
-BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
-SUGGEST_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'tfidf-suggest.py')
-OUTPUT_PATH = os.path.join(TEST_VAULT, 'agent', 'data', 'semantic-suggestions.md')
+BUILD_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'build-links-graph.py')
+SUGGEST_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'tfidf-suggest.py')
+OUTPUT_PATH = os.path.join(TEST_VAULT, 'wiki', 'data', 'semantic-suggestions.md')
 
 subprocess.run(['python3', BUILD_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 result = subprocess.run(['python3', SUGGEST_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)

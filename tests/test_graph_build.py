@@ -8,8 +8,8 @@ import sys
 
 
 TEST_VAULT = sys.argv[1]
-BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
-GRAPH_PATH = os.path.join(TEST_VAULT, 'agent', 'data', 'links-graph.json')
+BUILD_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'build-links-graph.py')
+GRAPH_PATH = os.path.join(TEST_VAULT, 'wiki', 'data', 'links-graph.json')
 
 result = subprocess.run(['python3', BUILD_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 assert result.returncode == 0, f"build-links-graph.py failed: {result.stderr}"

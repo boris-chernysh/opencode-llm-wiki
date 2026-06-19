@@ -2,7 +2,7 @@
 """Build a link graph from Obsidian vault notes.
 
 Extracts `links` frontmatter field and `[[wikilinks]]` from body,
-builds an adjacency graph, and writes agent/data/links-graph.json.
+builds an adjacency graph, and writes wiki/data/links-graph.json.
 """
 import json
 import os
@@ -11,8 +11,8 @@ from collections import defaultdict
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-DATA_DIR = os.path.join(PROJECT_ROOT, 'agent', 'data')
-CONFIG_PATH = os.path.join(PROJECT_ROOT, 'agent', 'config.json')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'wiki', 'data')
+CONFIG_PATH = os.path.join(PROJECT_ROOT, 'wiki', 'config.json')
 SOURCE_DIRS = ['atoms']
 
 def load_config():

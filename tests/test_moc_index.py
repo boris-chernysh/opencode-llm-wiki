@@ -5,13 +5,13 @@ import subprocess
 import sys
 
 #!/usr/bin/env python3
-"""Test generate-moc-index.py: hubs sorted by degree, existing files."""
+"""Test wiki-moc index generation (read-only): hubs sorted by degree, existing files."""
 
 TEST_VAULT = sys.argv[1]
-BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
-ANALYZE_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'graph-analyze.py')
-MOC_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'generate-moc-index.py')
-MOC_PATH = os.path.join(TEST_VAULT, 'agent', 'moc-index.md')
+BUILD_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'build-links-graph.py')
+ANALYZE_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'graph-analyze.py')
+MOC_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'generate-moc-index.py')
+MOC_PATH = os.path.join(TEST_VAULT, 'wiki', 'moc-index.md')
 
 subprocess.run(['python3', BUILD_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 subprocess.run(['python3', ANALYZE_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
@@ -26,7 +26,7 @@ assert 'MOC index' in content, "Should have MOC index header"
 # Check all linked notes exist
 
 wikilinks = re.findall(r'\[\[([^\]]+)\]\]', content)
-graph_path = os.path.join(TEST_VAULT, 'agent', 'data', 'links-graph.json')
+graph_path = os.path.join(TEST_VAULT, 'wiki', 'data', 'links-graph.json')
 with open(graph_path) as f:
     graph = json.load(f)
 nodes = graph['nodes']

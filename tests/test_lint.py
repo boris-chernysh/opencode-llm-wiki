@@ -5,11 +5,11 @@ import subprocess
 import sys
 
 TEST_VAULT = sys.argv[1]
-INDEX_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')
-BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
-ANALYZE_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'graph-analyze.py')
-GEN_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'generate-tags-index.py')
-MOC_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'generate-moc-index.py')
+INDEX_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'index-tags.py')
+BUILD_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'build-links-graph.py')
+ANALYZE_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'graph-analyze.py')
+GEN_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'generate-tags-index.py')
+MOC_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'generate-moc-index.py')
 
 # Run all indexing
 subprocess.run(['python3', INDEX_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
@@ -24,7 +24,7 @@ assert result.returncode == 0
 assert 'Removed stale' not in result.stdout, f"Should be no stale tags on re-run: {result.stdout}"
 
 # 2) Missing descriptions: count tag files without description frontmatter
-tags_dir = os.path.join(TEST_VAULT, 'agent', 'tags')
+tags_dir = os.path.join(TEST_VAULT, 'wiki', 'tags')
 missing_desc = 0
 for f in os.listdir(tags_dir):
     if not f.endswith('.md'):
@@ -40,14 +40,14 @@ assert missing_desc >= 0, "Should count missing descriptions"
 # Already implicitly tested
 
 # 4) Graph orphans: read graph-stats.md
-stats_path = os.path.join(TEST_VAULT, 'agent', 'data', 'graph-stats.md')
+stats_path = os.path.join(TEST_VAULT, 'wiki', 'data', 'graph-stats.md')
 with open(stats_path) as f:
     stats_content = f.read()
 orphan_line = [line for line in stats_content.split('\n') if 'Сироты' in line or 'Всего:' in line]
 assert orphan_line, "Should report orphans"
 
 # 5) Artifact consistency: tags dir count vs tags-index entries
-tags_index_path = os.path.join(TEST_VAULT, 'agent', 'tags-index.md')
+tags_index_path = os.path.join(TEST_VAULT, 'wiki', 'tags-index.md')
 with open(tags_index_path) as f:
     ti_content = f.read()
 ti_entries = len([line for line in ti_content.split('\n') if line.startswith('- #')])

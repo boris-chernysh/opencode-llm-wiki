@@ -15,17 +15,17 @@ git clone https://github.com/boris-chernysh/opencode-llm-wiki.git /tmp/opencode-
 /tmp/opencode-llm-wiki/setup.sh /путь/к/vault
 ```
 
-Всё. `setup.sh` копирует `agent/`, `SKILL.md`, мержит команды, проверяет `index-tags.py`.
+Всё. `setup.sh` копирует `wiki/`, `SKILL.md`, мержит команды, проверяет `index-tags.py`.
 
 ## Установка (ручная)
 
 ```bash
 git clone https://github.com/boris-chernysh/opencode-llm-wiki.git /tmp/opencode-llm-wiki
-cp -r /tmp/opencode-llm-wiki/agent/ /путь/к/vault/
+cp -r /tmp/opencode-llm-wiki/wiki/ /путь/к/vault/
 mkdir -p /путь/к/vault/.opencode/skills/llm-wiki/
 cp /tmp/opencode-llm-wiki/SKILL.md /путь/к/vault/.opencode/skills/llm-wiki/SKILL.md
 ./merge-commands.sh /путь/к/vault
-cd /путь/к/vault && python3 agent/scripts/index-tags.py
+cd /путь/к/vault && python3 wiki/scripts/index-tags.py
 ```
 
 ## Установка через submodule (для git-отслеживаемых vault)
@@ -57,9 +57,9 @@ git submodule add https://github.com/boris-chernysh/opencode-llm-wiki.git .skill
 | `wiki-reindex` | Полная переиндексация vault: теги, граф, анализ, MOC |
 | `wiki-research` | Исследование темы по vault с компиляцией находок |
 | `wiki-analyze` | Поиск новых Zettelkasten-связей с preview перед применением |
-| `wiki-moc` | Поиск/создание MOC-хабов для кластеров |
+| `wiki-moc` | Поиск MOC-хабов для кластеров (read-only) |
 | `wiki-lint` | Read-only проверка здоровья vault и артефактов |
-| `wiki-process-note` | Предложение тегов и связей для необработанных заметок |
+| `wiki-ingest` | Импорт и разметка входящих заметок |
 
 Команды добавляются в `.opencode/opencode.json` через `merge-commands.sh`.
 
@@ -73,7 +73,7 @@ vault/
 ├── daily notes/            # ежедневные заметки
 ├── templates/              # шаблоны (исключаются из индексации)
 ├── ASSets/                 # вложения
-├── agent/                  # артефакты скилла (tags/, data/, research/)
+├── wiki/                  # артефакты скилла (tags/, data/, research/)
 └── .opencode/
     └── skills/
         └── llm-wiki/

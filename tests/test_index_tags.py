@@ -7,8 +7,8 @@ import sys
 
 
 TEST_VAULT = sys.argv[1]
-SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')
-TAGS_DIR = os.path.join(TEST_VAULT, 'agent', 'tags')
+SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'index-tags.py')
+TAGS_DIR = os.path.join(TEST_VAULT, 'wiki', 'tags')
 
 # Clean up from previous runs
 if os.path.exists(TAGS_DIR):

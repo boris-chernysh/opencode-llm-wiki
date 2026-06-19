@@ -6,15 +6,15 @@ import sys
 """Test generate-tags-index.py: entries count, descriptions."""
 
 TEST_VAULT = sys.argv[1]
-INDEX_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')
-GEN_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'generate-tags-index.py')
-INDEX_PATH = os.path.join(TEST_VAULT, 'agent', 'tags-index.md')
+INDEX_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'index-tags.py')
+GEN_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'generate-tags-index.py')
+INDEX_PATH = os.path.join(TEST_VAULT, 'wiki', 'tags-index.md')
 
 result = subprocess.run(['python3', INDEX_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 assert result.returncode == 0, f"index-tags.py failed: {result.stderr}"
 
 # Add description to a tag so it appears in tags-index
-tags_dir = os.path.join(TEST_VAULT, 'agent', 'tags')
+tags_dir = os.path.join(TEST_VAULT, 'wiki', 'tags')
 for tag_file in sorted(os.listdir(tags_dir)):
     if tag_file == 'здоровье.md':
         tag_path = os.path.join(tags_dir, tag_file)

@@ -6,13 +6,13 @@ user_response: ""
 
 checks:
   - type: file_exists
-    path: agent/tags-index.md
+    path: wiki/tags-index.md
     description: tags-index.md was created by reindex
   - type: content_not_contains
-    path: agent/tags-index.md
+    path: wiki/tags-index.md
     text: templates
     description: templates tag not in tags-index
   - type: content_not_contains
-    path: agent/tags-index.md
+    path: wiki/tags-index.md
     text: Базовая заметка
     description: Template note not in tags-index

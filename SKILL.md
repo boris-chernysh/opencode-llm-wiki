@@ -8,14 +8,14 @@ Enable an AI agent to navigate, analyze, and safely maintain an Obsidian vault. 
 
 ## Scope
 
-**In scope:** tag index, consolidated tag index, graph build/analysis, link suggestions (graph + TF-IDF), MOC hub discovery/creation, topic research, health/lint checks, note tagging/linking.
+**In scope:** tag index, consolidated tag index, graph build/analysis, link suggestions (graph + TF-IDF), MOC hub discovery (read-only), topic research, health/lint checks, note tagging/linking.
 
 **Out of scope:** external databases, vector stores, embeddings, real-time sync, full-text search engine, multi-user collaboration.
 
 ## Directory Contracts
 
 ```
-agent/                          # Skill root — all artifacts are regenerable
+wiki/                          # Skill root — all artifacts are regenerable
 ├── config.json                 # Thresholds, limits, exclusions (created with defaults)
 ├── tags/                       # Per-tag index files: tags/<tagname>.md
 ├── tags-index.md               # Consolidated tag index with descriptions
@@ -26,7 +26,8 @@ agent/                          # Skill root — all artifacts are regenerable
 │   ├── link-suggestions.md     # Graph-based link suggestions
 │   └── semantic-suggestions.md # TF-IDF based link suggestions
 ├── research/                   # Research outputs: YYYYMMDDHHMM Topic.md
-├── LOG.md                      # Operation log
+├── dates/                       # Date-based index: dates/YYYY/YYYY-MM.md
+├── LOG.md                       # Operation log
 └── scripts/                    # Python 3 stdlib scripts
     ├── index-tags.py
     ├── generate-tags-index.py
@@ -35,13 +36,14 @@ agent/                          # Skill root — all artifacts are regenerable
     ├── graph-suggest-links.py
     ├── tfidf-suggest.py
     └── generate-moc-index.py
+    └── index-dates.py
 ```
 
-**Key principle:** `agent/` artifacts are ephemeral — fully regenerable from vault source of truth (`atoms/`, `daily notes/`). If anything breaks, delete affected files and re-run scripts.
+**Key principle:** `wiki/` artifacts are ephemeral — fully regenerable from vault source of truth (`atoms/`, `daily notes/`). `dates/` adds a chronological index view. If anything breaks, delete affected files and re-run scripts.
 
 ## File Schemas
 
-### Tag index file: `agent/tags/<tagname>.md`
+### Tag index file: `wiki/tags/<tagname>.md`
 
 ```markdown
 ---
@@ -100,7 +102,7 @@ description: Одно предложение на русском, описыва
 | `shared_tags` | list | Tags present in both notes |
 | `tags_a`, `tags_b` | list | All tags of each note |
 
-### Research output: `agent/research/<YYYYMMDDHHMM> Topic.md`
+### Research output: `wiki/research/<YYYYMMDDHHMM> Topic.md`
 
 ```yaml
 ---
@@ -119,12 +121,12 @@ Body structure:
 4. `## Выводы` — 2-3 actionable conclusions
 5. `## Источники` — list of notes consulted as wikilinks
 
-### Log entry: `agent/LOG.md`
+### Log entry: `wiki/LOG.md`
 
 ```markdown
 ## YYYY-MM-DD HH:MM
 
-**Command:** wiki-reindex | wiki-research | wiki-analyze | wiki-moc | wiki-lint | wiki-process-note
+**Command:** wiki-reindex | wiki-research | wiki-analyze | wiki-moc | wiki-lint | wiki-ingest
 
 Описание задачи и выполненных изменений. Конкретные цифры: сколько тегов, узлов, связей, заметок.
 
@@ -141,12 +143,11 @@ Body structure:
 
 After any successful operation these hold:
 
-1. Every non-excluded tag in vault → index file in `agent/tags/`.
+1. Every non-excluded tag in vault → index file in `wiki/tags/`.
 2. No stale index files (tag vanished from vault → index deleted).
 3. Every graph node → existing `.md` in vault. Every edge → wikilink in source note.
-4. Every vault-modifying operation → logged in `agent/LOG.md` with `### Changes`.
+4. Every vault-modifying operation → logged in `wiki/LOG.md` with `### Changes`.
 5. Every tag index file has `description` frontmatter field (may be blank, but present).
-6. Every MOC note created by `wiki-moc` references notes that still exist in the cluster.
 
 ## Safety Rules
 
@@ -155,16 +156,16 @@ After any successful operation these hold:
 | Operation | What it modifies | Gate |
 |---|---|---|
 | `wiki-analyze` apply links | `links:` in vault notes | **Preview → confirm** |
-| `wiki-moc` create MOC notes | Creates `.md` in `atoms/` | **Preview → confirm** |
-| `wiki-process-note` apply | `tags:`, `links:` in vault notes, `agent/tags/*.md` | **Preview → confirm** |
-| Mass description update | `agent/tags/*.md` frontmatter | Auto only for **missing** descriptions, batch-limited |
+| `wiki-ingest` apply | `tags:`, `links:` in vault notes, `wiki/tags/*.md` | **Preview → confirm** |
+| Mass description update | `wiki/tags/*.md` frontmatter | Auto only for **missing** descriptions, batch-limited |
 
 ### Non-destructive operations — automatic
 
 | Operation | What it does |
 |---|---|
-| `wiki-reindex` scripts | Rebuilds `agent/` artifacts, never touches vault notes |
-| `wiki-research` | Reads vault, writes only to `agent/research/` |
+| `wiki-reindex` scripts | Rebuilds `wiki/` artifacts, never touches vault notes |
+| `wiki-research` | Reads vault, writes only to `wiki/research/` |
+| `wiki-moc` | Builds MOC index, never touches vault notes |
 | `wiki-lint` | Read-only analysis |
 
 ### Hard guardrails
@@ -172,7 +173,6 @@ After any successful operation these hold:
 - **Never** delete or modify files in `atoms/` or `daily notes/` without explicit user confirmation.
 - **Never** touch `templates/`, `.obsidian/`, `.trash/`, `.smtcmp_json_db/`.
 - **Never** add duplicate `links:` entries (dedup before writing).
-- **Never** create MOC notes for clusters with fewer than `min_cluster_size_for_moc` members or fewer than `min_tag_coherence_for_moc` shared tags.
 - **Never** apply more than `max_suggestions_to_validate` link suggestions per `wiki-analyze` run.
 
 ## Responsibility Matrix
@@ -188,7 +188,6 @@ After any successful operation these hold:
 | Generate tag descriptions | Agent (LLM) | Yes, only for missing, batch-limited |
 | **Suggest & apply tags/links** | Agent | **NO — requires confirmation** |
 | **Modify note `links:`** | Agent | **NO — requires confirmation** |
-| **Create MOC notes in atoms/** | Agent | **NO — requires confirmation** |
 | Search tags, read notes | Agent | Yes |
 | Research a topic | Agent | Yes |
 | Lint / health check | Agent | Yes (read-only) |
@@ -200,13 +199,14 @@ After any successful operation these hold:
 Full rebuild of all agent artifacts from vault source.
 
 **Steps:**
-1. Run: `python3 agent/scripts/index-tags.py && python3 agent/scripts/generate-tags-index.py && python3 agent/scripts/build-links-graph.py && python3 agent/scripts/graph-analyze.py && python3 agent/scripts/generate-moc-index.py`
-2. Read tag index files in `agent/tags/`.
+1. Run: `python3 wiki/scripts/index-tags.py && python3 wiki/scripts/generate-tags-index.py && python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-analyze.py && python3 wiki/scripts/generate-moc-index.py && python3 wiki/scripts/index-dates.py`
+2. Read tag index files in `wiki/tags/`.
 3. For any tag index file **missing** a `description` field — generate one. Do NOT overwrite existing descriptions.
 4. Re-run `generate-tags-index.py` to update consolidated index.
-5. Log to `agent/LOG.md`.
+5. Read monthly date index files in `wiki/dates/`. For any monthly file **missing** a `description` field — generate a short Russian summary (1-2 sentences) about that month's notes. Do NOT overwrite existing descriptions.
+6. Log to `wiki/LOG.md`.
 
-**Safety:** Read-only on vault. All writes go to `agent/`.
+**Safety:** Read-only on vault. All writes go to `wiki/`.
 **Duration:** 5–30 seconds for a ~2000-note vault.
 
 ### `wiki-research <topic>`
@@ -214,25 +214,25 @@ Full rebuild of all agent artifacts from vault source.
 Research a topic using tag indices.
 
 **Steps:**
-1. Read `agent/tags-index.md`. Find relevant tags by keyword match on tag names and descriptions.
-2. For each relevant tag, read `agent/tags/<tag>.md` to discover connected notes.
+1. Read `wiki/tags-index.md`. Find relevant tags by keyword match on tag names and descriptions.
+2. For each relevant tag, read `wiki/tags/<tag>.md` to discover connected notes.
 3. Read notes.
 4. Compile structured research summary following research output schema.
-5. Save to `agent/research/<YYYYMMDDHHMM> Topic.md`.
+5. Save to `wiki/research/<YYYYMMDDHHMM> Topic.md`.
 6. Return summary to user and log.
 
-**Safety:** Read-only on vault. Writes only to `agent/research/`.
+**Safety:** Read-only on vault. Writes only to `wiki/research/`.
 
 ### `wiki-analyze`
 
 Find and validate missing Zettelkasten links between notes.
 
 **Steps:**
-1. Run: `python3 agent/scripts/build-links-graph.py && python3 agent/scripts/graph-suggest-links.py && python3 agent/scripts/tfidf-suggest.py`
+1. Run: `python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-suggest-links.py && python3 wiki/scripts/tfidf-suggest.py`
 2. Read `link-suggestions.md` and `semantic-suggestions.md`.
 3. **FILTER suggestions:**
    - Exclude pairs where BOTH notes are from `daily notes/` source dir.
-   - Exclude pairs where either note has ONLY `#daily-note` tag.
+   - Exclude pairs where either note has ONLY tags from `exclude.tags_from_analyze` (config, e.g. `#daily-note`).
    - Exclude graph suggestions with `jaccard == 0` AND no `shared_tags`.
    - Exclude semantic suggestions with `similarity < min_tfidf_similarity` (config).
 4. Take top `max_suggestions_to_validate` (default 20) from filtered list.
@@ -253,67 +253,38 @@ Find and validate missing Zettelkasten links between notes.
    - If `links:` absent → create as YAML list with the target.
    - If `links:` is string → convert to list, append.
    - Log each edit immediately after applying.
-8. Re-run: `python3 agent/scripts/build-links-graph.py && python3 agent/scripts/graph-analyze.py`
-9. Log to `agent/LOG.md` with accepted/rejected counts.
+8. Re-run: `python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-analyze.py`
+9. Log to `wiki/LOG.md` with accepted/rejected counts.
 
 **Safety:** Steps 1–5 automatic and safe. Step 7 requires user confirmation after preview.
 
 ### `wiki-moc`
 
-Find clusters without hub notes and optionally create MOC notes.
+Build MOC hub index and report cluster rankings (read-only).
 
 **Steps:**
-1. Run: `python3 agent/scripts/build-links-graph.py && python3 agent/scripts/graph-analyze.py && python3 agent/scripts/generate-moc-index.py`
+1. Run: `python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-analyze.py && python3 wiki/scripts/generate-moc-index.py`
 2. Read `graph-stats.md` and `moc-index.md`.
-3. Identify clusters meeting criteria:
-   - Size ≥ `min_cluster_size_for_moc` (config, default 5).
-   - At least `min_tag_coherence_for_moc` notes share a common tag (config, default 3).
-   - No existing note links to ≥ 50% of cluster members (no hub exists).
-4. **PREVIEW — present to user:**
+3. Report hub rankings, cluster sizes, and top tags to user.
 
-   ```
-   | # | Кластер | Размер | Топ-теги | Предлагаемое имя MOC |
-   |---|---------|--------|----------|----------------------|
-   | 1 | 325     | 18     | travel, daily-event | Поездки и путешествия |
-   ```
-   **WAIT for user confirmation.**
-
-5. **CREATE (only after confirmation):** For each confirmed cluster (max `max_moc_per_run`, default 5):
-   - Create `atoms/<YYYYMMDDHHMM> <ClusterName>.md`
-   - Frontmatter:
-     ```yaml
-     ---
-     created: "YYYY-MM-DD"
-     tags:
-       - top_tag1
-       - top_tag2
-     links:
-       - "[[member1.md]]"
-       - "[[member2.md]]"
-     ---
-     ```
-   - Content: one-sentence cluster theme description in Russian + Dataview query for cluster members.
-6. Re-run `generate-moc-index.py`.
-7. Log to `agent/LOG.md`.
-
-**Safety:** Uses tag coherence quality gate, not just size. Max 5 MOC notes per run.
+**Safety:** Read-only. All writes go to `wiki/data/` and `wiki/moc-index.md`, never touches vault notes.
 
 ### `wiki-lint`
 
 Read-only health check of vault and skill artifacts.
 
 **Checks:**
-1. **Stale tag indexes:** `agent/tags/<tag>.md` exists but tag not in vault → report.
+1. **Stale tag indexes:** `wiki/tags/<tag>.md` exists but tag not in vault → report.
 2. **Missing descriptions:** Tag index files without `description` frontmatter → report count.
 3. **Broken wikilinks:** `links:` pointing to non-existent files → report.
 4. **Graph orphans:** Notes with degree 0, excluding daily notes → report count.
-5. **Artifact consistency:** `tags-index.md` entries match `agent/tags/*.md` → report drift.
+5. **Artifact consistency:** `tags-index.md` entries match `wiki/tags/*.md` → report drift.
 6. **Orphan MOC notes:** MOC notes referencing deleted notes → report.
 7. **Malformed links:** `links:` entries not in `[[wikilink]]` format → report.
 
 **Output:** Structured checklist to user. No files modified.
 
-### `wiki-process-note [filename]`
+### `wiki-ingest [filename]`
 
 Suggest and apply tags + links for unprocessed notes or a specific note.
 
@@ -325,11 +296,11 @@ Suggest and apply tags + links for unprocessed notes or a specific note.
    - Read note content and existing frontmatter.
    - **Find relevant tags:**
      - Extract keywords from note title (strip ZK prefix, remove stopwords).
-     - Match against `agent/tags-index.md` tag names and descriptions.
+     - Match against `wiki/tags-index.md` tag names and descriptions.
      - Exclude already-assigned tags and excluded tags (`need-processing`, `daily-note`).
      - Take top 5 most relevant tags.
    - **Find candidate links:**
-     - For each relevant tag, read `agent/tags/<tag>.md` → candidate notes.
+     - For each relevant tag, read `wiki/tags/<tag>.md` → candidate notes.
      - Grep vault `atoms/` and `daily notes/` for key phrases from note title.
      - Exclude already-linked notes, self, and notes with ONLY `daily-note` tag.
      - Score by common tags + keyword matches. Take top 5.
@@ -346,9 +317,9 @@ Suggest and apply tags + links for unprocessed notes or a specific note.
 
 4. **APPLY (only after confirmation):**
    - Update note frontmatter: merge new tags into `tags:` list (dedup), merge new links into `links:` list (dedup).
-   - Update `agent/tags/<tag>.md` for each tag — add note wikilink if not already present.
+   - Update `wiki/tags/<tag>.md` for each tag — add note wikilink if not already present.
    - Never remove existing tags or links.
-5. Log to `agent/LOG.md` with `### Changes`.
+5. Log to `wiki/LOG.md` with `### Changes`.
 
 **Safety:** Requires user confirmation. Max 10 notes, 5 tags, 5 links per note. Never removes existing links or tags.
 
@@ -359,8 +330,8 @@ Suggest and apply tags + links for unprocessed notes or a specific note.
 | `wiki-reindex` | No | No (safe) |
 | `wiki-research` | No | No (safe) |
 | `wiki-analyze` | **Yes** — before applying links | **Yes** |
-| `wiki-moc` | **Yes** — before creating MOC notes | **Yes** |
-| `wiki-process-note` | **Yes** — before applying | **Yes** |
+| `wiki-moc` | No | No (safe) |
+| `wiki-ingest` | **Yes** — before applying | **Yes** |
 | `wiki-lint` | No (always read-only) | No |
 
 The agent must present changes in a table and wait for explicit user approval. Ambiguous responses ("maybe", "I guess", silence) → abort destructive step.
@@ -368,17 +339,12 @@ The agent must present changes in a table and wait for explicit user approval. A
 ## Failure Recovery
 
 ### Agent crashes during wiki-analyze link application
-1. Check `agent/LOG.md` → most recent `### Changes` section.
+1. Check `wiki/LOG.md` → most recent `### Changes` section.
 2. Each applied link is individually logged with file path.
 3. Re-run `wiki-analyze` from step 1. Agent deduplicates already-applied links.
 
-### Agent crashes during wiki-moc MOC creation
-1. Check `atoms/` for recently created files with `created` timestamp matching the run.
-2. Remove any empty or malformed MOC notes.
-3. Re-run `wiki-moc` from step 1.
-
 ### Script produces corrupted output
-1. Delete the affected file in `agent/data/` or `agent/tags/`.
+1. Delete the affected file in `wiki/data/` or `wiki/tags/`.
 2. Re-run the script. All agent artifacts are regenerable from vault source.
 
 ### Cluster labels changed after re-run (expected)
@@ -393,14 +359,13 @@ MOC notes reference cluster members by `[[wikilink]]`, not by cluster ID. The MO
 
 ### Link Suggestions
 - Exclude pairs where BOTH notes are from `daily notes/`.
-- Exclude pairs where either note has ONLY `#daily-note` tag.
+- Exclude pairs where either note has ONLY tags listed in `exclude.tags_from_analyze` (config, default `#daily-note`).
 - Minimum content length for TF-IDF: `min_content_tokens` tokens (config, default 50).
 - Minimum TF-IDF similarity: `min_tfidf_similarity` (config, default 0.20).
 
-### MOC
-- Minimum cluster size: `min_cluster_size_for_moc` (config, default 5).
-- Minimum tag coherence: `min_tag_coherence_for_moc` notes share a tag (config, default 3).
-- Maximum MOC notes per run: `max_moc_per_run` (config, default 5).
+### MOC Index
+- Minimum cluster size for reporting: `min_cluster_size_for_moc` (config, default 5).
+- Read-only — only generates `wiki/moc-index.md`, never creates vault notes.
 
 ### Tag Descriptions
 - Only generated when **missing** (absent field in frontmatter), never overwritten.
@@ -408,7 +373,7 @@ MOC notes reference cluster members by `[[wikilink]]`, not by cluster ID. The MO
 
 ## Config
 
-`agent/config.json`:
+`wiki/config.json`:
 
 ```json
 {
@@ -423,6 +388,7 @@ MOC notes reference cluster members by `[[wikilink]]`, not by cluster ID. The MO
   },
   "exclude": {
     "tags": ["need-processing", "daily-note"],
+    "tags_from_analyze": ["daily-note"],
     "dirs_from_suggestions": ["daily notes"],
     "dirs_from_graph": []
   },
@@ -454,20 +420,21 @@ Scripts fall back to hardcoded defaults if `config.json` is missing or unparseab
 
 | Script | Input | Output | Idempotent? |
 |--------|-------|--------|-------------|
-| `index-tags.py` | `atoms/`, `daily notes/` | `agent/tags/*.md` | Yes |
-| `generate-tags-index.py` | `agent/tags/*.md` | `agent/tags-index.md` | Yes |
-| `build-links-graph.py` | `atoms/` | `agent/data/links-graph.json` | Yes |
-| `graph-analyze.py` | `agent/data/links-graph.json` | `agent/data/graph-stats.md`, updates `links-graph.json` | Approx* |
-| `graph-suggest-links.py` | `agent/data/links-graph.json` | `agent/data/link-suggestions.md` | Yes |
-| `tfidf-suggest.py` | `agent/data/links-graph.json`, vault notes | `agent/data/semantic-suggestions.md` | Yes |
-| `generate-moc-index.py` | `agent/data/links-graph.json` | `agent/moc-index.md` | Yes |
+| `index-tags.py` | `atoms/`, `daily notes/` | `wiki/tags/*.md` | Yes |
+| `generate-tags-index.py` | `wiki/tags/*.md` | `wiki/tags-index.md` | Yes |
+| `build-links-graph.py` | `atoms/` | `wiki/data/links-graph.json` | Yes |
+| `graph-analyze.py` | `wiki/data/links-graph.json` | `wiki/data/graph-stats.md`, updates `links-graph.json` | Approx* |
+| `graph-suggest-links.py` | `wiki/data/links-graph.json` | `wiki/data/link-suggestions.md` | Yes |
+| `tfidf-suggest.py` | `wiki/data/links-graph.json`, vault notes | `wiki/data/semantic-suggestions.md` | Yes |
+| `generate-moc-index.py` | `wiki/data/links-graph.json` | `wiki/moc-index.md` | Yes |
+| `index-dates.py` | `atoms/`, `daily notes/` | `wiki/dates/YYYY/YYYY-MM.md` | Yes |
 
 *Cluster labels from label propagation may shift between runs — this is cosmetic.
 
 ## Search by Tag
 
-When the user asks to search notes by tag, read `agent/tags/<tag>.md` and return the list of wikilinks. If the file doesn't exist, suggest running `wiki-reindex`.
+When the user asks to search notes by tag, read `wiki/tags/<tag>.md` and return the list of wikilinks. If the file doesn't exist, suggest running `wiki-reindex`.
 
 ## Script Dependencies
 
-Scripts assume they are run from the project root (e.g., `python3 agent/scripts/index-tags.py`). They resolve paths relative to the script location. All scripts require Python 3.6+ with stdlib only.
+Scripts assume they are run from the project root (e.g., `python3 wiki/scripts/index-tags.py`). They resolve paths relative to the script location. All scripts require Python 3.6+ with stdlib only.

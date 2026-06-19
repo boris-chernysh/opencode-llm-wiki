@@ -8,16 +8,16 @@ MODE="${2:---symlink}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# 1. Копируем/линкуем agent/
+# 1. Копируем/линкуем wiki/
 if [ "$MODE" = "--copy" ]; then
-  cp -r "$SCRIPT_DIR/agent/" "$VAULT/agent/"
+  cp -r "$SCRIPT_DIR/wiki/" "$VAULT/wiki/"
 else
-  mkdir -p "$VAULT/agent/scripts"
-  for script in "$SCRIPT_DIR/agent/scripts/"*.py; do
-    ln -sf "$script" "$VAULT/agent/scripts/$(basename "$script")"
+  mkdir -p "$VAULT/wiki/scripts"
+  for script in "$SCRIPT_DIR/wiki/scripts/"*.py; do
+    ln -sf "$script" "$VAULT/wiki/scripts/$(basename "$script")"
   done
-  ln -sf "$SCRIPT_DIR/agent/scripts/.gitignore" "$VAULT/agent/scripts/.gitignore" 2>/dev/null || true
-  ln -sf "$SCRIPT_DIR/agent/config.json" "$VAULT/agent/config.json"
+  ln -sf "$SCRIPT_DIR/wiki/scripts/.gitignore" "$VAULT/wiki/scripts/.gitignore" 2>/dev/null || true
+  ln -sf "$SCRIPT_DIR/wiki/config.json" "$VAULT/wiki/config.json"
 fi
 
 # 2. Копируем SKILL.md
@@ -33,4 +33,4 @@ fi
 
 # 4. Проверка
 echo "Проверка: запуск index-tags.py..."
-cd "$VAULT" && python3 agent/scripts/index-tags.py && echo "✓ Установка завершена."
+cd "$VAULT" && python3 wiki/scripts/index-tags.py && echo "✓ Установка завершена."

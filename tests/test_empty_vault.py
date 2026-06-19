@@ -13,9 +13,9 @@ try:
     os.makedirs(os.path.join(empty_vault, 'daily notes'))
 
     # Copy agent scripts and config
-    agent_dir = os.path.join(empty_vault, 'agent')
+    agent_dir = os.path.join(empty_vault, 'wiki')
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    shutil.copytree(os.path.join(repo_root, 'agent'), agent_dir)
+    shutil.copytree(os.path.join(repo_root, 'wiki'), agent_dir)
 
     scripts = [
         ('index-tags.py', 'index-tags'),
@@ -29,18 +29,18 @@ try:
 
     for script, name in scripts:
         result = subprocess.run(
-            ['python3', os.path.join(empty_vault, 'agent', 'scripts', script)],
+            ['python3', os.path.join(empty_vault, 'wiki', 'scripts', script)],
             cwd=empty_vault, capture_output=True, text=True
         )
         assert result.returncode == 0, f"{name} failed on empty vault: {result.stderr}"
 
     # Verify empty outputs
-    tags_dir = os.path.join(empty_vault, 'agent', 'tags')
+    tags_dir = os.path.join(empty_vault, 'wiki', 'tags')
     assert os.path.exists(tags_dir), "tags dir should exist"
     tag_files = [f for f in os.listdir(tags_dir) if f.endswith('.md')]
     assert len(tag_files) == 0, f"Empty vault should have 0 tag files, got {tag_files}"
 
-    data_dir = os.path.join(empty_vault, 'agent', 'data')
+    data_dir = os.path.join(empty_vault, 'wiki', 'data')
     if os.path.exists(data_dir):
         links_graph = os.path.join(data_dir, 'links-graph.json')
         if os.path.exists(links_graph):

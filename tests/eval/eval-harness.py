@@ -90,17 +90,17 @@ MIN_PASSES = 1
 has_opencode = False
 
 def setup_vault(fixture_name):
-    """Copy fixture vault to temp dir with agent/, SKILL.md, opencode.json, AGENTS.md."""
+    """Copy fixture vault to temp dir with wiki/, SKILL.md, opencode.json, AGENTS.md."""
     src = os.path.join(FIXTURES_DIR, fixture_name)
     dst = tempfile.mkdtemp(prefix=f'test-eval-{fixture_name}-')
 
     if os.path.isdir(src):
         shutil.copytree(src, dst, dirs_exist_ok=True)
 
-    # Copy agent/ scripts (skip generated dirs)
-    agent_src = os.path.join(REPO_ROOT, 'agent')
-    agent_dst = os.path.join(dst, 'agent')
-    shutil.copytree(agent_src, agent_dst, dirs_exist_ok=True,
+    # Copy wiki/ scripts (skip generated dirs)
+    wiki_src = os.path.join(REPO_ROOT, 'wiki')
+    wiki_dst = os.path.join(dst, 'wiki')
+    shutil.copytree(wiki_src, wiki_dst, dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns('tags', 'data', 'research',
                                                   'moc-index.md', 'tags-index.md', 'LOG.md'))
 
@@ -116,11 +116,11 @@ def setup_vault(fixture_name):
         "command": {
             "wiki-reindex": {
                 "description": "Full reindex of the Obsidian vault.",
-                "template": "Load the llm-wiki skill. Run: python3 agent/scripts/index-tags.py && python3 agent/scripts/generate-tags-index.py && python3 agent/scripts/build-links-graph.py && python3 agent/scripts/graph-analyze.py && python3 agent/scripts/generate-moc-index.py."
+                "template": "Load the llm-wiki skill. Run: python3 wiki/scripts/index-tags.py && python3 wiki/scripts/generate-tags-index.py && python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-analyze.py && python3 wiki/scripts/generate-moc-index.py && python3 wiki/scripts/index-dates.py."
             },
             "wiki-research": {
                 "description": "Research a topic using the vault.",
-                "template": "Load the llm-wiki skill. Read agent/tags-index.md. Find relevant tags. Read notes. Compile structured research summary in Russian: Краткий снимок → Ключевые находки → Выводы → Источники. Save to agent/research/<YYYYMMDDHHMM> Topic.md with frontmatter: topic, date, tags."
+                "template": "Load the llm-wiki skill. Read wiki/tags-index.md. Find relevant tags. Read notes. Compile structured research summary in Russian: Краткий снимок → Ключевые находки → Выводы → Источники. Save to wiki/research/<YYYYMMDDHHMM> Topic.md with frontmatter: topic, date, tags."
             },
             "wiki-analyze": {
                 "description": "Analyze vault for new connections. SHOW PREVIEW, WAIT for confirmation.",
@@ -128,15 +128,14 @@ def setup_vault(fixture_name):
                 "subtask": True
             },
             "wiki-moc": {
-                "description": "Find or create MOC hub notes. SHOW PREVIEW, WAIT for confirmation.",
-                "template": "Load the llm-wiki skill. Run graph analysis. Identify clusters. Show preview table. WAIT for user confirmation. Create MOC notes only if user says yes/да.",
-                "subtask": True
+                "description": "Build MOC hub index and report cluster rankings (read-only).",
+                "template": "Load the llm-wiki skill. Run graph analysis. Read graph-stats.md and moc-index.md. Report hub rankings, cluster sizes, and top tags to user."
             },
             "wiki-lint": {
                 "description": "Read-only health check of vault and skill artifacts.",
                 "template": "Load the llm-wiki skill. Run a read-only health check. Check stale tags, missing descriptions, broken links, orphans, consistency. Report findings. Do NOT modify any files."
             },
-            "wiki-process-note": {
+            "wiki-ingest": {
                 "description": "Suggest and apply tags + links for unprocessed notes.",
                 "template": "Load the llm-wiki skill. Find notes with need-processing tag (max 10). For each: extract keywords, find relevant tags and candidate links. Show preview table. WAIT for user confirmation. Apply only after user says yes/да. Do NOT remove the need-processing tag.",
                 "subtask": True

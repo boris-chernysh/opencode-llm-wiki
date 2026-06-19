@@ -6,14 +6,14 @@ import sys
 """Test wiki-process-note: keyword extraction, tag matching, candidate scoring."""
 
 TEST_VAULT = sys.argv[1]
-TAGS_INDEX_PATH = os.path.join(TEST_VAULT, 'agent', 'tags-index.md')
-TAGS_DIR = os.path.join(TEST_VAULT, 'agent', 'tags')
+TAGS_INDEX_PATH = os.path.join(TEST_VAULT, 'wiki', 'tags-index.md')
+TAGS_DIR = os.path.join(TEST_VAULT, 'wiki', 'tags')
 
 # Run index-tags.py first
 
-subprocess.run(['python3', os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')],
+subprocess.run(['python3', os.path.join(TEST_VAULT, 'wiki', 'scripts', 'index-tags.py')],
                cwd=TEST_VAULT, capture_output=True, text=True)
-subprocess.run(['python3', os.path.join(TEST_VAULT, 'agent', 'scripts', 'generate-tags-index.py')],
+subprocess.run(['python3', os.path.join(TEST_VAULT, 'wiki', 'scripts', 'generate-tags-index.py')],
                cwd=TEST_VAULT, capture_output=True, text=True)
 
 # Simulate process-note logic: keyword extraction from title

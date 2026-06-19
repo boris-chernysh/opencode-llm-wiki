@@ -10,6 +10,7 @@
   },
   "exclude": {
     "tags": ["need-processing", "daily-note"],
+    "tags_from_analyze": ["daily-note"],
     "dirs_from_suggestions": ["daily notes"],
     "dirs_from_graph": []
   },

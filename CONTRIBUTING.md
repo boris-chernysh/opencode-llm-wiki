@@ -9,7 +9,7 @@ cd opencode-llm-wiki
 
 ## Линтинг
 pip install ruff
-ruff check agent/scripts/ tests/
+ruff check wiki/scripts/ tests/
 
 ## Процесс
 1. Форк + ветка

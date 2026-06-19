@@ -2,7 +2,7 @@
 """Generate MOC (Map of Content) index from hub notes.
 
 Scans atoms/ for notes with `links:` frontmatter field,
-identifies hub notes (high out-degree), and generates agent/moc-index.md.
+identifies hub notes (high out-degree), and generates wiki/moc-index.md.
 """
 import json
 import os
@@ -10,10 +10,10 @@ from collections import defaultdict
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-DATA_DIR = os.path.join(PROJECT_ROOT, 'agent', 'data')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'wiki', 'data')
 GRAPH_PATH = os.path.join(DATA_DIR, 'links-graph.json')
-OUTPUT_PATH = os.path.join(PROJECT_ROOT, 'agent', 'moc-index.md')
-CONFIG_PATH = os.path.join(PROJECT_ROOT, 'agent', 'config.json')
+OUTPUT_PATH = os.path.join(PROJECT_ROOT, 'wiki', 'moc-index.md')
+CONFIG_PATH = os.path.join(PROJECT_ROOT, 'wiki', 'config.json')
 
 MIN_LINKS = 5
 MAX_ENTRIES = 50

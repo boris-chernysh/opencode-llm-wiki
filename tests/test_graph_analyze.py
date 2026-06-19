@@ -7,9 +7,9 @@ import sys
 
 
 TEST_VAULT = sys.argv[1]
-BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
-ANALYZE_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'graph-analyze.py')
-STATS_PATH = os.path.join(TEST_VAULT, 'agent', 'data', 'graph-stats.md')
+BUILD_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'build-links-graph.py')
+ANALYZE_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'graph-analyze.py')
+STATS_PATH = os.path.join(TEST_VAULT, 'wiki', 'data', 'graph-stats.md')
 
 subprocess.run(['python3', BUILD_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 result = subprocess.run(['python3', ANALYZE_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)

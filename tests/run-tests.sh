@@ -13,7 +13,7 @@ echo "=== Настройка тестового vault ==="
 
 mkdir -p "$TEST_VAULT"
 cp -r "$SCRIPT_DIR/fixtures/vault/"* "$TEST_VAULT/"
-cp -r "$REPO_ROOT/agent/" "$TEST_VAULT/agent/"
+cp -r "$REPO_ROOT/wiki/" "$TEST_VAULT/wiki/"
 
 echo "Тестовый vault: $TEST_VAULT"
 echo ""

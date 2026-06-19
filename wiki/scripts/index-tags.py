@@ -6,8 +6,8 @@ import re
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-TAGS_DIR = os.path.join(PROJECT_ROOT, 'agent', 'tags')
-CONFIG_PATH = os.path.join(PROJECT_ROOT, 'agent', 'config.json')
+TAGS_DIR = os.path.join(PROJECT_ROOT, 'wiki', 'tags')
+CONFIG_PATH = os.path.join(PROJECT_ROOT, 'wiki', 'config.json')
 SOURCE_DIRS = ['atoms', 'daily notes']
 EXCLUDED_TAGS = {'need-processing', 'daily-note'}
 

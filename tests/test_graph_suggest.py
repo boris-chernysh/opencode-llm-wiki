@@ -7,9 +7,9 @@ import sys
 
 
 TEST_VAULT = sys.argv[1]
-BUILD_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'build-links-graph.py')
-SUGGEST_SCRIPT = os.path.join(TEST_VAULT, 'agent', 'scripts', 'graph-suggest-links.py')
-SUGGEST_PATH = os.path.join(TEST_VAULT, 'agent', 'data', 'link-suggestions.md')
+BUILD_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'build-links-graph.py')
+SUGGEST_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'graph-suggest-links.py')
+SUGGEST_PATH = os.path.join(TEST_VAULT, 'wiki', 'data', 'link-suggestions.md')
 
 subprocess.run(['python3', BUILD_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)
 result = subprocess.run(['python3', SUGGEST_SCRIPT], cwd=TEST_VAULT, capture_output=True, text=True)

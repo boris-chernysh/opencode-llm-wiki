@@ -4,8 +4,8 @@ import os
 #!/usr/bin/env python3
 """Generate link suggestions from the graph using Common Neighbors and Jaccard.
 
-Loads agent/data/links-graph.json, computes missing link scores,
-and writes agent/data/link-suggestions.md.
+Loads wiki/data/links-graph.json, computes missing link scores,
+and writes wiki/data/link-suggestions.md.
 
 Filters out daily-notes noise: excludes pairs where both notes
 are from excluded directories or have only excluded tags.
@@ -15,10 +15,10 @@ are from excluded directories or have only excluded tags.
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-DATA_DIR = os.path.join(PROJECT_ROOT, 'agent', 'data')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'wiki', 'data')
 GRAPH_PATH = os.path.join(DATA_DIR, 'links-graph.json')
 OUTPUT_PATH = os.path.join(DATA_DIR, 'link-suggestions.md')
-CONFIG_PATH = os.path.join(PROJECT_ROOT, 'agent', 'config.json')
+CONFIG_PATH = os.path.join(PROJECT_ROOT, 'wiki', 'config.json')
 
 MIN_COMMON = 1
 MAX_SUGGESTIONS = 50

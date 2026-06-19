@@ -1,8 +1,9 @@
-agent/tags/
-agent/data/
-agent/research/
-agent/moc-index.md
-agent/tags-index.md
-agent/LOG.md
+wiki/tags/
+wiki/data/
+wiki/research/
+wiki/dates/
+wiki/moc-index.md
+wiki/tags-index.md
+wiki/LOG.md
 __pycache__/
 .DS_Store

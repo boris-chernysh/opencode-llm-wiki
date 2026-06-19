@@ -9,11 +9,11 @@ import sys
 TEST_VAULT = sys.argv[1]
 
 # Run indexing
-subprocess.run(['python3', os.path.join(TEST_VAULT, 'agent', 'scripts', 'index-tags.py')],
+subprocess.run(['python3', os.path.join(TEST_VAULT, 'wiki', 'scripts', 'index-tags.py')],
                cwd=TEST_VAULT, capture_output=True, text=True)
 
 # Add description to здоровье tag so it appears in tags-index
-tags_dir = os.path.join(TEST_VAULT, 'agent', 'tags')
+tags_dir = os.path.join(TEST_VAULT, 'wiki', 'tags')
 zdorovie_path = os.path.join(tags_dir, 'здоровье.md')
 if os.path.exists(zdorovie_path):
     with open(zdorovie_path) as f:
@@ -23,11 +23,11 @@ if os.path.exists(zdorovie_path):
         with open(zdorovie_path, 'w') as f:
             f.write(new_content)
 
-subprocess.run(['python3', os.path.join(TEST_VAULT, 'agent', 'scripts', 'generate-tags-index.py')],
+subprocess.run(['python3', os.path.join(TEST_VAULT, 'wiki', 'scripts', 'generate-tags-index.py')],
                cwd=TEST_VAULT, capture_output=True, text=True)
 
 # Read tags-index.md and search for topic
-tags_index_path = os.path.join(TEST_VAULT, 'agent', 'tags-index.md')
+tags_index_path = os.path.join(TEST_VAULT, 'wiki', 'tags-index.md')
 with open(tags_index_path) as f:
     ti_content = f.read()
 
@@ -35,7 +35,7 @@ with open(tags_index_path) as f:
 assert 'здоровье' in ti_content.lower(), "tags-index should contain здоровье"
 
 # Create a research output file
-research_dir = os.path.join(TEST_VAULT, 'agent', 'research')
+research_dir = os.path.join(TEST_VAULT, 'wiki', 'research')
 os.makedirs(research_dir, exist_ok=True)
 
 ts = datetime.datetime.now().strftime('%Y%m%d%H%M')

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Analyze the link graph: hubs, orphans, bridges, clusters.
 
-Loads agent/data/links-graph.json, performs graph analysis,
-and writes agent/data/graph-stats.md.
+Loads wiki/data/links-graph.json, performs graph analysis,
+and writes wiki/data/graph-stats.md.
 """
 import json
 import os
@@ -10,7 +10,7 @@ from collections import defaultdict, deque
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-DATA_DIR = os.path.join(PROJECT_ROOT, 'agent', 'data')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'wiki', 'data')
 GRAPH_PATH = os.path.join(DATA_DIR, 'links-graph.json')
 OUTPUT_PATH = os.path.join(DATA_DIR, 'graph-stats.md')
 

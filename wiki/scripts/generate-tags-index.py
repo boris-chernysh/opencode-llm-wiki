@@ -4,8 +4,8 @@ import os
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-TAGS_DIR = os.path.join(PROJECT_ROOT, 'agent', 'tags')
-INDEX_PATH = os.path.join(PROJECT_ROOT, 'agent', 'tags-index.md')
+TAGS_DIR = os.path.join(PROJECT_ROOT, 'wiki', 'tags')
+INDEX_PATH = os.path.join(PROJECT_ROOT, 'wiki', 'tags-index.md')
 
 def extract_description(filepath):
     with open(filepath, encoding='utf-8') as f:
