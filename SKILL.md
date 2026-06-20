@@ -157,7 +157,7 @@ After any successful operation these hold:
 |---|---|---|
 | `wiki-analyze` apply links | `links:` in vault notes | **Preview → confirm** |
 | `wiki-ingest` apply | `tags:`, `links:` in vault notes, `wiki/tags/*.md` | **Preview → confirm** |
-| Mass description update | `wiki/tags/*.md` frontmatter | Auto only for **missing** descriptions, batch-limited |
+| Mass description update | `wiki/tags/*.md` frontmatter | Auto only for **missing** descriptions |
 
 ### Non-destructive operations — automatic
 
@@ -184,7 +184,7 @@ After any successful operation these hold:
 | Generate link suggestions | `graph-suggest-links.py`, `tfidf-suggest.py` | Yes |
 | Generate MOC index | `generate-moc-index.py` | Yes |
 | Consolidate tag index | `generate-tags-index.py` | Yes |
-| Generate tag descriptions | Agent (LLM) | Yes, only for missing, batch-limited |
+| Generate tag descriptions | Agent (LLM) | Yes, only for missing |
 | **Suggest & apply tags/links** | Agent | **NO — requires confirmation** |
 | **Modify note `links:`** | Agent | **NO — requires confirmation** |
 | Search tags, read notes | Agent | Yes |
@@ -200,7 +200,7 @@ Full rebuild of all agent artifacts from vault source.
 **Steps:**
 1. Run: `python3 wiki/scripts/index-tags.py && python3 wiki/scripts/generate-tags-index.py && python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-analyze.py && python3 wiki/scripts/generate-moc-index.py && python3 wiki/scripts/index-dates.py`
 2. Read tag index files in `wiki/tags/`.
-3. For any tag index file **missing** a `description` field — generate one. Do NOT overwrite existing descriptions.
+3. For any tag index file **missing** a `description` field — generate one. Do NOT overwrite existing descriptions. Generate descriptions for ALL missing tags (no per-run limit).
 4. Re-run `generate-tags-index.py` to update consolidated index.
 5. Read monthly date index files in `wiki/dates/`. For any monthly file **missing** a `description` field — generate a short Russian summary (1-2 sentences) about that month's notes. Do NOT overwrite existing descriptions.
 6. Read `wiki/data/graph-stats.md` and `wiki/moc-index.md`. Report hub rankings, cluster sizes, and top tags to user.
