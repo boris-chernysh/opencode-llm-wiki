@@ -127,10 +127,6 @@ def setup_vault(fixture_name):
                 "template": "Load the llm-wiki skill. Run graph analysis scripts. Read suggestions. Show preview table. WAIT for user confirmation. Only apply links if user says yes/да/применить.",
                 "subtask": True
             },
-            "wiki-moc": {
-                "description": "Build MOC hub index and report cluster rankings (read-only).",
-                "template": "Load the llm-wiki skill. Run graph analysis. Read graph-stats.md and moc-index.md. Report hub rankings, cluster sizes, and top tags to user."
-            },
             "wiki-lint": {
                 "description": "Read-only health check of vault and skill artifacts.",
                 "template": "Load the llm-wiki skill. Run a read-only health check. Check stale tags, missing descriptions, broken links, orphans, consistency. Report findings. Do NOT modify any files."

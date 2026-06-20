@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 #!/usr/bin/env python3
-"""Test wiki-moc index generation (read-only): hubs sorted by degree, existing files."""
+"""Test MOC index generation (read-only): hubs sorted by degree, existing files."""
 
 TEST_VAULT = sys.argv[1]
 BUILD_SCRIPT = os.path.join(TEST_VAULT, 'wiki', 'scripts', 'build-links-graph.py')

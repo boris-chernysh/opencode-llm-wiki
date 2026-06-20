@@ -126,7 +126,7 @@ Body structure:
 ```markdown
 ## YYYY-MM-DD HH:MM
 
-**Command:** wiki-reindex | wiki-research | wiki-analyze | wiki-moc | wiki-lint | wiki-ingest
+**Command:** wiki-reindex | wiki-research | wiki-analyze | wiki-lint | wiki-ingest
 
 Описание задачи и выполненных изменений. Конкретные цифры: сколько тегов, узлов, связей, заметок.
 
@@ -165,7 +165,6 @@ After any successful operation these hold:
 |---|---|
 | `wiki-reindex` scripts | Rebuilds `wiki/` artifacts, never touches vault notes |
 | `wiki-research` | Reads vault, writes only to `wiki/research/` |
-| `wiki-moc` | Builds MOC index, never touches vault notes |
 | `wiki-lint` | Read-only analysis |
 
 ### Hard guardrails
@@ -204,7 +203,8 @@ Full rebuild of all agent artifacts from vault source.
 3. For any tag index file **missing** a `description` field — generate one. Do NOT overwrite existing descriptions.
 4. Re-run `generate-tags-index.py` to update consolidated index.
 5. Read monthly date index files in `wiki/dates/`. For any monthly file **missing** a `description` field — generate a short Russian summary (1-2 sentences) about that month's notes. Do NOT overwrite existing descriptions.
-6. Log to `wiki/LOG.md`.
+6. Read `wiki/data/graph-stats.md` and `wiki/moc-index.md`. Report hub rankings, cluster sizes, and top tags to user.
+7. Log to `wiki/LOG.md`.
 
 **Safety:** Read-only on vault. All writes go to `wiki/`.
 **Duration:** 5–30 seconds for a ~2000-note vault.
@@ -257,17 +257,6 @@ Find and validate missing Zettelkasten links between notes.
 9. Log to `wiki/LOG.md` with accepted/rejected counts.
 
 **Safety:** Steps 1–5 automatic and safe. Step 7 requires user confirmation after preview.
-
-### `wiki-moc`
-
-Build MOC hub index and report cluster rankings (read-only).
-
-**Steps:**
-1. Run: `python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-analyze.py && python3 wiki/scripts/generate-moc-index.py`
-2. Read `graph-stats.md` and `moc-index.md`.
-3. Report hub rankings, cluster sizes, and top tags to user.
-
-**Safety:** Read-only. All writes go to `wiki/data/` and `wiki/moc-index.md`, never touches vault notes.
 
 ### `wiki-lint`
 
@@ -330,7 +319,6 @@ Suggest and apply tags + links for unprocessed notes or a specific note.
 | `wiki-reindex` | No | No (safe) |
 | `wiki-research` | No | No (safe) |
 | `wiki-analyze` | **Yes** — before applying links | **Yes** |
-| `wiki-moc` | No | No (safe) |
 | `wiki-ingest` | **Yes** — before applying | **Yes** |
 | `wiki-lint` | No (always read-only) | No |
 

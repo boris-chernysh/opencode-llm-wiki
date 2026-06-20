@@ -54,10 +54,9 @@ git submodule add https://github.com/boris-chernysh/opencode-llm-wiki.git .skill
 
 | Команда | Описание |
 |---|---|
-| `wiki-reindex` | Полная переиндексация vault: теги, граф, анализ, MOC |
+| `wiki-reindex` | Полная переиндексация vault: теги, граф, анализ, MOC, даты |
 | `wiki-research` | Исследование темы по vault с компиляцией находок |
 | `wiki-analyze` | Поиск новых Zettelkasten-связей с preview перед применением |
-| `wiki-moc` | Поиск MOC-хабов для кластеров (read-only) |
 | `wiki-lint` | Read-only проверка здоровья vault и артефактов |
 | `wiki-ingest` | Импорт и разметка входящих заметок |
 

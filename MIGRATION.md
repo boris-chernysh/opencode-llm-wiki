@@ -6,7 +6,7 @@
 |--------|-----|-----|
 | Directory renamed | `agent/` | `wiki/` |
 | Command renamed | `wiki-process-note` | `wiki-ingest` |
-| `wiki-moc` behavior | Created MOC files in `atoms/` | Read-only, only builds `moc-index.md` |
+| `wiki-moc` behavior | Created MOC files in `atoms/` | Read-only, now part of `wiki-reindex` |
 
 ## New Features
 
