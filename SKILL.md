@@ -275,7 +275,7 @@ Read-only health check of vault and skill artifacts.
 
 ### `wiki-ingest [filename]`
 
-Suggest and apply tags + links for unprocessed notes or a specific note.
+Suggest and apply tags + links + project for unprocessed notes or a specific note.
 
 **Steps:**
 1. Find target notes:
@@ -293,24 +293,30 @@ Suggest and apply tags + links for unprocessed notes or a specific note.
      - Grep vault `atoms/` and `daily notes/` for key phrases from note title.
      - Exclude already-linked notes, self, and notes with ONLY `daily-note` tag.
      - Score by common tags + keyword matches. Take top 5.
+   - **Find most relevant project (SKIP if note already has `project:` field set):**
+     - Read `wiki/tags/project.md` to get the list of all project notes.
+     - For each project note, read its title.
+     - Match ingested note title/keywords against project titles.
+     - Select the single best match. If no good match, skip (show `—`).
    - `need-processing` tag is NOT removed. It stays as a marker.
 3. **PREVIEW** — present to user as a table:
 
    ```
-   | # | Заметка | Текущие теги | Предлагаемые теги | Предлагаемые связи |
-   |---|---------|-------------|-------------------|-------------------|
-   | 1 | [[note]] | task | career, … | [[a]], [[b]] |
+   | # | Заметка | Текущие теги | Предлагаемые теги | Предлагаемые связи | Проект |
+   |---|---------|-------------|-------------------|-------------------|--------|
+   | 1 | [[note]] | task | career, … | [[a]], [[b]] | [[Сайт-портфолио]] |
    ```
 
    **WAIT for user confirmation.** Do not apply without explicit approval.
 
 4. **APPLY (only after confirmation):**
    - Update note frontmatter: merge new tags into `tags:` list (dedup), merge new links into `links:` list (dedup).
+   - If project was suggested and `project:` field is absent — set `project: "[[project-note.md]]"`. If `project:` already set — skip.
    - Update `wiki/tags/<tag>.md` for each tag — add note wikilink if not already present.
-   - Never remove existing tags or links.
+   - Never remove existing tags, links, or project.
 5. Log to `wiki/LOG.md` with `### Changes`.
 
-**Safety:** Requires user confirmation. Max 10 notes, 5 tags, 5 links per note. Never removes existing links or tags.
+**Safety:** Requires user confirmation. Max 10 notes, 5 tags, 5 links, 1 project per note. Never removes existing links, tags, or project assignments.
 
 ## Dry Run / Preview / Confirm Policy
 
