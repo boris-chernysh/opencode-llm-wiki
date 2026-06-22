@@ -1,3 +1,8 @@
+---
+name: llm-wiki
+description: "AI agent skill for Obsidian vault maintenance: tag indexing, link graph, TF-IDF suggestions, MOC discovery, research, and linting."
+---
+
 # Skill: llm-wiki
 
 LLM Wiki — personal skill for Obsidian vault knowledge management: tag indexing, graph analysis, link suggestions, MOC hubs, research, and health checks. Designed for a single-owner Zettelkasten+Dataview vault with Russian-language content.
