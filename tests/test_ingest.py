@@ -82,7 +82,7 @@ for line in project_content.split('\n'):
 
 assert len(project_titles) >= 1, "Should have at least one project note listed"
 
-# Simulate matching: ingested note title "need-processing заметка" 
+# Simulate matching: ingested note title "need-processing заметка"
 # keywords: ['need-processing', 'заметка'] should NOT match 'Сайт портфолио'
 # (negative test — different domain)
 ingest_kw = extract_keywords('need-processing заметка')
