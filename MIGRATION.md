@@ -1,5 +1,7 @@
 # Migration Guide: v0.1.0 → v0.2.0
 
+> **v0.2.0 → v0.3.0:** Commands were moved to `commands/wiki-*.md`. See [`MIGRATION_COMMANDS.md`](MIGRATION_COMMANDS.md).
+
 ## Breaking Changes
 
 | Change | Old | New |

@@ -24,13 +24,35 @@ fi
 mkdir -p "$VAULT/.opencode/skills/llm-wiki/"
 cp "$SCRIPT_DIR/SKILL.md" "$VAULT/.opencode/skills/llm-wiki/SKILL.md"
 
-# 3. Мержим команды
-if [ -f "$SCRIPT_DIR/merge-commands.sh" ]; then
-  bash "$SCRIPT_DIR/merge-commands.sh" "$VAULT"
-else
-  echo "⚠ merge-commands.sh не найден. Добавь команды вручную из opencode-commands.json"
+# 3. Устанавливаем команды в .opencode/commands/
+mkdir -p "$VAULT/.opencode/commands"
+for cmd in reindex research analyze lint ingest; do
+  src="$SCRIPT_DIR/commands/wiki-$cmd.md"
+  dst="$VAULT/.opencode/commands/wiki-$cmd.md"
+  if [ ! -f "$src" ]; then
+    echo "⚠ Пропуск: $src не найден"
+    continue
+  fi
+  if [ "$MODE" = "--copy" ]; then
+    cp "$src" "$dst"
+  else
+    ln -sf "$src" "$dst"
+  fi
+done
+
+# 4. Очистка устаревшего command: блока в opencode.json (если есть)
+if [ -f "$VAULT/.opencode/opencode.json" ]; then
+  python3 -c "
+import json
+p='$VAULT/.opencode/opencode.json'
+d=json.load(open(p))
+if 'command' in d:
+    d.pop('command')
+    json.dump(d, open(p,'w'), indent=2, ensure_ascii=False)
+    print('Удалён устаревший command: блок из opencode.json')
+" 2>/dev/null || true
 fi
 
-# 4. Проверка
+# 5. Проверка
 echo "Проверка: запуск index-tags.py..."
 cd "$VAULT" && python3 wiki/scripts/index-tags.py && echo "✓ Установка завершена."

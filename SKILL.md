@@ -191,132 +191,17 @@ After any successful operation these hold:
 | Research a topic | Agent | Yes |
 | Lint / health check | Agent | Yes (read-only) |
 
-## Command Contracts
+## Command Index
 
-### `wiki-reindex`
+Detailed per-command contracts live in `commands/wiki-*.md` (one file per command). Each file is what the agent receives when the user runs that command. Opencode loads them natively from `<vault>/.opencode/commands/`.
 
-Full rebuild of all agent artifacts from vault source.
-
-**Steps:**
-1. Run: `python3 wiki/scripts/index-tags.py && python3 wiki/scripts/generate-tags-index.py && python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-analyze.py && python3 wiki/scripts/generate-moc-index.py && python3 wiki/scripts/index-dates.py`
-2. Read tag index files in `wiki/tags/`.
-3. For any tag index file **missing** a `description` field — generate one. Do NOT overwrite existing descriptions. Generate descriptions for ALL missing tags (no per-run limit).
-4. Re-run `generate-tags-index.py` to update consolidated index.
-5. Read monthly date index files in `wiki/dates/`. For any monthly file **missing** a `description` field — generate a short Russian summary (1-2 sentences) about that month's notes. Do NOT overwrite existing descriptions.
-6. Read `wiki/data/graph-stats.md` and `wiki/moc-index.md`. Report hub rankings, cluster sizes, and top tags to user.
-7. Log to `wiki/LOG.md`.
-
-**Safety:** Read-only on vault. All writes go to `wiki/`.
-**Duration:** 5–30 seconds for a ~2000-note vault.
-
-### `wiki-research <topic>`
-
-Research a topic using tag indices.
-
-**Steps:**
-1. Read `wiki/tags-index.md`. Find relevant tags by keyword match on tag names and descriptions.
-2. For each relevant tag, read `wiki/tags/<tag>.md` to discover connected notes.
-3. Read notes.
-4. Compile structured research summary following research output schema.
-5. Save to `wiki/research/<YYYYMMDDHHMM> Topic.md`.
-6. Return summary to user and log.
-
-**Safety:** Read-only on vault. Writes only to `wiki/research/`.
-
-### `wiki-analyze`
-
-Find and validate missing Zettelkasten links between notes.
-
-**Steps:**
-1. Run: `python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-suggest-links.py && python3 wiki/scripts/tfidf-suggest.py`
-2. Read `link-suggestions.md` and `semantic-suggestions.md`.
-3. **FILTER suggestions:**
-   - Exclude pairs where BOTH notes are from `daily notes/` source dir.
-   - Exclude pairs where either note has ONLY tags from `exclude.tags_from_analyze` (config, e.g. `#daily-note`).
-   - Exclude graph suggestions with `jaccard == 0` AND no `shared_tags`.
-   - Exclude semantic suggestions with `similarity < min_tfidf_similarity` (config).
-4. Take top `max_suggestions_to_validate` (default 20) from filtered list.
-5. **VALIDATION (read-only):** For each suggestion, read both notes. Assess semantic relevance. Classify each as accepted or rejected with one-sentence reason in Russian.
-6. **PREVIEW — present to user:**
-
-   ```
-   | # | Источник | Цель | Тип | Причина |
-   |---|----------|------|-----|---------|
-   | 1 | [[note_a]] | [[note_b]] | graph | 3 общих соседа, тема: здоровье |
-   | 2 | [[note_c]] | [[note_d]] | tfidf | similarity 0.45, тема: управление |
-   ```
-   **WAIT for user confirmation.** Do not apply without explicit approval.
-
-7. **APPLY (only after confirmation):** For each accepted suggestion:
-   - Read source note frontmatter.
-   - If `links:` exists as list → append target (if not already present).
-   - If `links:` absent → create as YAML list with the target.
-   - If `links:` is string → convert to list, append.
-   - Log each edit immediately after applying.
-8. Re-run: `python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-analyze.py`
-9. Log to `wiki/LOG.md` with accepted/rejected counts.
-
-**Safety:** Steps 1–5 automatic and safe. Step 7 requires user confirmation after preview.
-
-### `wiki-lint`
-
-Read-only health check of vault and skill artifacts.
-
-**Checks:**
-1. **Stale tag indexes:** `wiki/tags/<tag>.md` exists but tag not in vault → report.
-2. **Missing descriptions:** Tag index files without `description` frontmatter → report count.
-3. **Broken wikilinks:** `links:` pointing to non-existent files → report.
-4. **Graph orphans:** Notes with degree 0, excluding daily notes → report count.
-5. **Artifact consistency:** `tags-index.md` entries match `wiki/tags/*.md` → report drift.
-6. **Orphan MOC notes:** MOC notes referencing deleted notes → report.
-7. **Malformed links:** `links:` entries not in `[[wikilink]]` format → report.
-
-**Output:** Structured checklist to user. No files modified.
-
-### `wiki-ingest [filename]`
-
-Suggest and apply tags + links + project for unprocessed notes or a specific note.
-
-**Steps:**
-1. Find target notes:
-   - If `filename` provided → single note.
-   - Otherwise → all notes with `need-processing` tag (max 10 per run).
-2. For each note:
-   - Read note content and existing frontmatter.
-   - **Find relevant tags:**
-     - Extract keywords from note title (strip ZK prefix, remove stopwords).
-     - Match against `wiki/tags-index.md` tag names and descriptions.
-     - Exclude already-assigned tags and excluded tags (`need-processing`, `daily-note`).
-     - Take top 5 most relevant tags.
-   - **Find candidate links:**
-     - For each relevant tag, read `wiki/tags/<tag>.md` → candidate notes.
-     - Grep vault `atoms/` and `daily notes/` for key phrases from note title.
-     - Exclude already-linked notes, self, and notes with ONLY `daily-note` tag.
-     - Score by common tags + keyword matches. Take top 5.
-   - **Find most relevant project (SKIP if note already has `project:` field set):**
-     - Read `wiki/tags/project.md` to get the list of all project notes.
-     - For each project note, read its title.
-     - Match ingested note title/keywords against project titles.
-     - Select the single best match. If no good match, skip (show `—`).
-   - `need-processing` tag is NOT removed. It stays as a marker.
-3. **PREVIEW** — present to user as a table:
-
-   ```
-   | # | Заметка | Текущие теги | Предлагаемые теги | Предлагаемые связи | Проект |
-   |---|---------|-------------|-------------------|-------------------|--------|
-   | 1 | [[note]] | task | career, … | [[a]], [[b]] | [[Сайт-портфолио]] |
-   ```
-
-   **WAIT for user confirmation.** Do not apply without explicit approval.
-
-4. **APPLY (only after confirmation):**
-   - Update note frontmatter: merge new tags into `tags:` list (dedup), merge new links into `links:` list (dedup).
-   - If project was suggested and `project:` field is absent — set `project: "[[project-note.md]]"`. If `project:` already set — skip.
-   - Update `wiki/tags/<tag>.md` for each tag — add note wikilink if not already present.
-   - Never remove existing tags, links, or project.
-5. Log to `wiki/LOG.md` with `### Changes`.
-
-**Safety:** Requires user confirmation. Max 10 notes, 5 tags, 5 links, 1 project per note. Never removes existing links, tags, or project assignments.
+| Command | File | Summary |
+|---|---|---|
+| `wiki-reindex` | `commands/wiki-reindex.md` | Full rebuild of all `wiki/` artifacts; read-only on vault |
+| `wiki-research <topic>` | `commands/wiki-research.md` | Research a topic via tag indices; writes to `wiki/research/` |
+| `wiki-analyze` | `commands/wiki-analyze.md` | Find/validate Zettelkasten link suggestions; **requires confirm** |
+| `wiki-lint` | `commands/wiki-lint.md` | Read-only health check |
+| `wiki-ingest [filename]` | `commands/wiki-ingest.md` | Tag+link unprocessed notes; **requires confirm** |
 
 ## Dry Run / Preview / Confirm Policy
 

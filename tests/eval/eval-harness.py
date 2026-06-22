@@ -109,34 +109,19 @@ def setup_vault(fixture_name):
     os.makedirs(skill_dst, exist_ok=True)
     shutil.copy(os.path.join(REPO_ROOT, 'SKILL.md'), os.path.join(skill_dst, 'SKILL.md'))
 
-    # Create .opencode/opencode.json with skill config and commands
+    # Install command .md files into .opencode/commands/ (v0.3.0+ native loading)
+    cmds_src = os.path.join(REPO_ROOT, 'commands')
+    cmds_dst = os.path.join(dst, '.opencode', 'commands')
+    os.makedirs(cmds_dst, exist_ok=True)
+    if os.path.isdir(cmds_src):
+        for cmd_file in glob(os.path.join(cmds_src, '*.md')):
+            shutil.copy(cmd_file, cmds_dst)
+
+    # Create .opencode/opencode.json with skill config (no command: block —
+    # commands are loaded natively from .opencode/commands/ since v0.3.0).
     opencode_config = {
         "instructions": ["AGENTS.md"],
         "skills": {"paths": [".opencode/skills"]},
-        "command": {
-            "wiki-reindex": {
-                "description": "Full reindex of the Obsidian vault.",
-                "template": "Load the llm-wiki skill. Run: python3 wiki/scripts/index-tags.py && python3 wiki/scripts/generate-tags-index.py && python3 wiki/scripts/build-links-graph.py && python3 wiki/scripts/graph-analyze.py && python3 wiki/scripts/generate-moc-index.py && python3 wiki/scripts/index-dates.py."
-            },
-            "wiki-research": {
-                "description": "Research a topic using the vault.",
-                "template": "Load the llm-wiki skill. Read wiki/tags-index.md. Find relevant tags. Read notes. Compile structured research summary in Russian: Краткий снимок → Ключевые находки → Выводы → Источники. Save to wiki/research/<YYYYMMDDHHMM> Topic.md with frontmatter: topic, date, tags."
-            },
-            "wiki-analyze": {
-                "description": "Analyze vault for new connections. SHOW PREVIEW, WAIT for confirmation.",
-                "template": "Load the llm-wiki skill. Run graph analysis scripts. Read suggestions. Show preview table. WAIT for user confirmation. Only apply links if user says yes/да/применить.",
-                "subtask": True
-            },
-            "wiki-lint": {
-                "description": "Read-only health check of vault and skill artifacts.",
-                "template": "Load the llm-wiki skill. Run a read-only health check. Check stale tags, missing descriptions, broken links, orphans, consistency. Report findings. Do NOT modify any files."
-            },
-            "wiki-ingest": {
-                "description": "Suggest and apply tags + links for unprocessed notes.",
-                "template": "Load the llm-wiki skill. Find notes with need-processing tag (max 10). For each: extract keywords, find relevant tags and candidate links. Show preview table. WAIT for user confirmation. Apply only after user says yes/да. Do NOT remove the need-processing tag.",
-                "subtask": True
-            }
-        }
     }
     opencode_dir = os.path.join(dst, '.opencode')
     os.makedirs(opencode_dir, exist_ok=True)

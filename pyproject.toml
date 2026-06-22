@@ -1,6 +1,6 @@
 [project]
 name = "opencode-llm-wiki"
-version = "0.2.0"
+version = "0.3.0"
 description = "AI skill for Obsidian vault: tags, graph, TF-IDF, MOC hubs, research, linting"
 requires-python = ">=3.8"
 license = {text = "MIT"}

@@ -15,7 +15,7 @@ git clone https://github.com/boris-chernysh/opencode-llm-wiki.git /tmp/opencode-
 /tmp/opencode-llm-wiki/setup.sh /путь/к/vault
 ```
 
-Всё. `setup.sh` копирует `wiki/`, `SKILL.md`, мержит команды, проверяет `index-tags.py`.
+Всё. `setup.sh` копирует `wiki/`, `SKILL.md`, устанавливает команды из `commands/` в `<vault>/.opencode/commands/`, проверяет `index-tags.py`.
 
 ## Установка (ручная)
 
@@ -24,7 +24,8 @@ git clone https://github.com/boris-chernysh/opencode-llm-wiki.git /tmp/opencode-
 cp -r /tmp/opencode-llm-wiki/wiki/ /путь/к/vault/
 mkdir -p /путь/к/vault/.opencode/skills/llm-wiki/
 cp /tmp/opencode-llm-wiki/SKILL.md /путь/к/vault/.opencode/skills/llm-wiki/SKILL.md
-./merge-commands.sh /путь/к/vault
+mkdir -p /путь/к/vault/.opencode/commands/
+cp /tmp/opencode-llm-wiki/commands/wiki-*.md /путь/к/vault/.opencode/commands/
 cd /путь/к/vault && python3 wiki/scripts/index-tags.py
 ```
 
@@ -47,8 +48,20 @@ git submodule add https://github.com/boris-chernysh/opencode-llm-wiki.git .skill
 Для обновления:
 
 ```bash
-./setup.sh /путь/к/vault --copy --update
+./setup.sh /путь/к/vault --copy
 ```
+
+## Обновление с v0.2.0
+
+Если у вас установлен v0.2.0 с командами, встроенными в `opencode.json` (`command:` блок), мигрируйте:
+
+```bash
+cd /path/to/opencode-llm-wiki
+git pull
+./migrate-commands.sh /путь/к/vault
+```
+
+Подробности: [`MIGRATION_COMMANDS.md`](MIGRATION_COMMANDS.md). Поведение команд не меняется.
 
 ## Команды
 
@@ -60,7 +73,7 @@ git submodule add https://github.com/boris-chernysh/opencode-llm-wiki.git .skill
 | `wiki-lint` | Read-only проверка здоровья vault и артефактов |
 | `wiki-ingest` | Импорт и разметка входящих заметок |
 
-Команды добавляются в `.opencode/opencode.json` через `merge-commands.sh`.
+Команды лежат в `commands/wiki-*.md` (по одному файлу на команду) и устанавливаются в `<vault>/.opencode/commands/`. Opencode загружает их нативно. Детали каждой команды — в `SKILL.md` → Command Index.
 
 ## Структура vault
 
@@ -74,6 +87,7 @@ vault/
 ├── ASSets/                 # вложения
 ├── wiki/                  # артефакты скилла (tags/, data/, research/)
 └── .opencode/
+    ├── commands/           # команды opencode (wiki-*.md)
     └── skills/
         └── llm-wiki/
             └── SKILL.md
