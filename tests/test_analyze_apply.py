@@ -131,7 +131,6 @@ assert 'links' in new_fields3, "Should create links field"
 # Test 4: Written output uses the canonical "«filename»" quoted form.
 # Catch the bug where add_link_to_frontmatter produces unquoted
 # wikilinks or quotes-inside-brackets.
-import re
 def assert_canonical_quoted(content, source_path):
     if 'links:' not in content:
         return

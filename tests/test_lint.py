@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Test wiki-lint: 7 categories of health checks."""
 import os
+import re
 import subprocess
 import sys
 
@@ -60,8 +61,6 @@ assert ti_entries <= tag_files_count, f"tags-index entries ({ti_entries}) > tag 
 
 # 7) Malformed links: every links: frontmatter item must be the canonical
 # quoted form "[[filename]]". Flag unquoted wikilinks and quotes-inside-brackets.
-import re
-
 CANONICAL_ITEM = re.compile(r'^"\[\[.+\]\]"$')
 
 malformed_files = []
@@ -99,7 +98,7 @@ for fname in os.listdir(os.path.join(TEST_VAULT, 'atoms')):
                 malformed_files.append((fname, item))
 
 assert not malformed_files, (
-    f'Malformed links: frontmatter items (expected "«filename»" with double quotes):\n'
+    'Malformed links: frontmatter items (expected "«filename»" with double quotes):\n'
     + '\n'.join(f'  {f}: {item!r}' for f, item in malformed_files)
 )
 
