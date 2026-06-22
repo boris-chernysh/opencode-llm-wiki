@@ -178,6 +178,7 @@ After any successful operation these hold:
 - **Never** touch `templates/`, `.obsidian/`, `.trash/`, `.smtcmp_json_db/`.
 - **Never** add duplicate `links:` entries (dedup before writing).
 - **Never** apply more than `max_suggestions_to_validate` link suggestions per `wiki-analyze` run.
+- **Never** write `[[filename]]` unquoted in `links:` frontmatter. Always wrap in double quotes: `"[[filename]]"`. Unquoted form parses as a YAML flow sequence and is silently broken.
 
 ## Responsibility Matrix
 
@@ -295,6 +296,14 @@ Scripts fall back to hardcoded defaults if `config.json` is missing or unparseab
 ## Obsidian Compatibility
 
 - Wikilinks: `[[filename]]` format. `.md` extension normalized during graph build.
+- **`links:` frontmatter — canonical form:** every list item MUST be wrapped in double quotes:
+
+  ```yaml
+  links:
+    - "[[filename.md]]"
+  ```
+
+  Unquoted `- [[filename.md]]` parses as a YAML flow sequence (not a string) and Obsidian misreads it. Quotes inside brackets (`- [["filename.md"]]`) parse as a list of strings, not a wikilink. The double-quoted form is the only safe one.
 - Frontmatter: YAML-like (simple key: value, YAML lists via `-` prefix).
 - Dataview: MOC notes include Dataview queries compatible with community plugin.
 - Zettelkasten: atomic notes in `atoms/` with timestamp prefixes. Links stored in `links:` frontmatter.

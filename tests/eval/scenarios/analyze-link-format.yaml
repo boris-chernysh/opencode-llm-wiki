@@ -1,0 +1,14 @@
+name: analyze-link-format
+description: After wiki-analyze, all links: frontmatter items must be the canonical "«filename»" quoted form. Catches the bug where the agent writes unquoted ««filename»» or «[«"filename"»]».
+fixture: minimal-vault
+command: wiki-analyze
+user_response: "да"
+
+checks:
+  - type: links_quoted_format
+    path: atoms/
+    description: All links: items use the canonical "«filename»" quoted form
+  - type: content_contains
+    path: atoms/202501010003 Бег по утрам.md
+    text: "[[202501010001 Здоровое питание]]"
+    description: Existing pre-existing link preserved

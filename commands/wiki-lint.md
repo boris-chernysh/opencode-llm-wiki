@@ -18,6 +18,11 @@ Run a read-only health check of the vault and skill artifacts.
 
 6. **Orphan MOC notes:** Read `wiki/moc-index.md`. Check whether any hub notes reference files that don't exist. Report findings.
 
-7. **Malformed links:** Spot-check `atoms/` for `links:` frontmatter entries not in `[[wikilink]]` format. Report any malformed entries.
+7. **Malformed links:** Scan all `atoms/*.md`. For each `links:` frontmatter list, verify every item matches the canonical quoted form `"[[filename]]"`. Flag any of the following variants:
+   - Unquoted: `- [[filename.md]]` (YAML parses as a flow sequence, not a string — silently broken)
+   - Quotes inside brackets: `- [["filename.md"]]` (parses as a list of strings, not a wikilink)
+   - Missing brackets or quotes
+
+   List affected file paths so the user can fix them.
 
 Report findings as a structured checklist to the user. Do **NOT** modify any files. Log findings to `wiki/LOG.md`.

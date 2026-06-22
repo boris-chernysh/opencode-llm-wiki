@@ -44,6 +44,7 @@ Load the llm-wiki skill.
 
 **Step 4 — APPLY (only after confirmation):**
 - Update note frontmatter: merge new tags into `tags:` list (dedup), merge new links into `links:` list (dedup).
+- **Format rule:** every `links:` list item must be `"[[filename]]"` — wikilink wrapped in double quotes. Never write `[[filename]]` unquoted (YAML parses it as a flow sequence) and never put quotes inside the brackets (`[["filename"]]` parses as a nested list).
 - If project was suggested and `project:` field is absent → set `project: "[[project-note.md]]"`. If `project:` already set → skip.
 - Update `wiki/tags/<tag>.md` for each new tag — add note wikilink if not already present.
 - **Never** remove existing tags, links, or project.

@@ -249,6 +249,52 @@ def check_scenario(scenario, vault_path):
                     ok = len(links) == len(set(links))
                 else:
                     ok = False
+            elif check_type == 'links_quoted_format':
+                # Scan all .md files under `path` (typically atoms/) and verify
+                # every links: frontmatter list item matches the canonical
+                # quoted form "['['filename']]'". Catch unquoted wikilinks and
+                # quotes-inside-brackets variants.
+                path = os.path.join(vault_path, check['path'])
+                canonical = re.compile(r'^"\[\[.+\]\]"$')
+                ok = True
+                if not os.path.isdir(path):
+                    ok = False
+                else:
+                    for fname in os.listdir(path):
+                        if not fname.endswith('.md'):
+                            continue
+                        fpath = os.path.join(path, fname)
+                        with open(fpath) as f:
+                            content = f.read()
+                        if 'links:' not in content:
+                            continue
+                        parts = content.split('---', 2)
+                        if len(parts) < 3:
+                            continue
+                        fm_text = parts[1]
+                        in_links = False
+                        for line in fm_text.split('\n'):
+                            stripped = line.strip()
+                            if stripped.startswith('links:'):
+                                in_links = True
+                                after = stripped[len('links:'):].strip()
+                                if after and not after.startswith('['):
+                                    if not canonical.match(after):
+                                        ok = False
+                                        break
+                                continue
+                            if in_links:
+                                if not stripped:
+                                    continue
+                                if not stripped.startswith('-'):
+                                    in_links = False
+                                    continue
+                                item = stripped[1:].strip()
+                                if not canonical.match(item):
+                                    ok = False
+                                    break
+                        if not ok:
+                            break
             elif check_type == 'tag_not_removed':
                 path = os.path.join(vault_path, check['path'])
                 if os.path.isfile(path):

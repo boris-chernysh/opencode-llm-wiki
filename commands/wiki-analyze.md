@@ -36,10 +36,17 @@ python3 wiki/scripts/tfidf-suggest.py
 
 **Step 7 — APPLY (only after confirmation):** For each accepted suggestion:
 1. Read source note frontmatter.
-2. If `links:` exists as list → append target (dedup).
-3. If `links:` absent → create as YAML list with the target.
-4. If `links:` is string → convert to list, append.
-5. Log each edit immediately after applying.
+2. If `links:` exists as YAML list → append `"[[target]]"` to the list (dedup against the quoted form).
+3. If `links:` absent → create as YAML list, first item being `"[[target]]"`.
+4. If `links:` is a string → convert to list, then append `"[[target]]"`.
+5. **Format rule:** every `links:` list item MUST be `"[[filename]]"` — wikilink wrapped in double quotes. Never write `[[filename]]` unquoted (YAML parses it as a flow sequence, not a string) and never put quotes inside the brackets (`[["filename"]]` parses as a nested list). Correct:
+
+   ```yaml
+   links:
+     - "[[filename.md]]"
+   ```
+
+6. Log each edit immediately after applying.
 
 **Step 8 — re-run:**
 ```

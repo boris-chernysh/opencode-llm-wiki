@@ -58,16 +58,49 @@ assert ti_entries <= tag_files_count, f"tags-index entries ({ti_entries}) > tag 
 # 6) Orphan MOC notes: read moc-index.md
 # Already tested in test_moc_index
 
-# 7) Malformed links: check frontmatter links use wikilink format
-# Spot-check: build-links-graph already extracts links properly
+# 7) Malformed links: every links: frontmatter item must be the canonical
+# quoted form "[[filename]]". Flag unquoted wikilinks and quotes-inside-brackets.
+import re
 
+CANONICAL_ITEM = re.compile(r'^"\[\[.+\]\]"$')
+
+malformed_files = []
 for fname in os.listdir(os.path.join(TEST_VAULT, 'atoms')):
     if not fname.endswith('.md'):
         continue
-    with open(os.path.join(TEST_VAULT, 'atoms', fname)) as f:
+    fpath = os.path.join(TEST_VAULT, 'atoms', fname)
+    with open(fpath) as f:
         content = f.read()
-    if 'links:' in content and '[[' not in content.split('links:')[1].split('\n')[0]:
-        # Single link without wikilink format is OK (string value)
-        pass
+    if 'links:' not in content:
+        continue
+    parts = content.split('---', 2)
+    if len(parts) < 3:
+        continue
+    fm_text = parts[1]
+    in_links = False
+    for line in fm_text.split('\n'):
+        stripped = line.strip()
+        if stripped.startswith('links:'):
+            in_links = True
+            # Single-line inline: `links: "[[file]]"` is allowed
+            after = stripped[len('links:'):].strip()
+            if after and not after.startswith('['):
+                if not CANONICAL_ITEM.match(after):
+                    malformed_files.append((fname, after))
+            continue
+        if in_links:
+            if not stripped:
+                continue
+            if not stripped.startswith('-'):
+                in_links = False
+                continue
+            item = stripped[1:].strip()
+            if not CANONICAL_ITEM.match(item):
+                malformed_files.append((fname, item))
+
+assert not malformed_files, (
+    f'Malformed links: frontmatter items (expected "«filename»" with double quotes):\n'
+    + '\n'.join(f'  {f}: {item!r}' for f, item in malformed_files)
+)
 
 print("PASS: test_lint — 7 health checks passed")

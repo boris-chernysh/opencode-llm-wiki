@@ -76,7 +76,10 @@ def add_link_to_frontmatter(content, target):
         if key == 'links':
             lines.append('links:')
             for item in val:
-                lines.append(f'  - {item}')
+                # Canonical form: wikilink wrapped in double quotes.
+                # Unquoted "[[X]]" parses as YAML flow sequence (broken);
+                # [["X"]] parses as nested list. Only "['[[X]]']" is safe.
+                lines.append(f'  - "{item}"')
         else:
             if isinstance(val, list):
                 lines.append(f'{key}:')
@@ -125,4 +128,44 @@ assert 'links' in new_fields3, "Should create links field"
 # Note: our simplified function doesn't handle absent field well in write-back
 # but the main logic of merging is correct
 
-print("PASS: test_analyze_apply — link merge, dedup, and absent-field handling")
+# Test 4: Written output uses the canonical "«filename»" quoted form.
+# Catch the bug where add_link_to_frontmatter produces unquoted
+# wikilinks or quotes-inside-brackets.
+import re
+def assert_canonical_quoted(content, source_path):
+    if 'links:' not in content:
+        return
+    fm = content.split('---', 2)
+    if len(fm) < 3:
+        return
+    fm_text = fm[1]
+    in_links = False
+    for line in fm_text.split('\n'):
+        stripped = line.strip()
+        if stripped.startswith('links:'):
+            in_links = True
+            continue
+        if in_links:
+            if not stripped:
+                continue
+            if not stripped.startswith('-'):
+                in_links = False
+                continue
+            item = stripped[1:].strip()
+            # Canonical: "[[...]]" with double quotes around the wikilink.
+            assert item.startswith('"[[') and item.endswith(']]"'), (
+                f'{source_path}: links item not in canonical quoted form: {item!r}\n'
+                f'expected: "[[filename]]"  got: {item!r}'
+            )
+
+# Apply to the originally-modified note (Test 1) — it has new content with appended link.
+assert_canonical_quoted(new_content, note_path)
+assert_canonical_quoted(new_content2, note_path)
+assert_canonical_quoted(new_content3, note_path2)
+
+# Also verify the pre-existing fixture note still uses the canonical form
+with open(note_path) as f:
+    fixture_content = f.read()
+assert_canonical_quoted(fixture_content, note_path)
+
+print("PASS: test_analyze_apply — link merge, dedup, absent-field, and quoted-format handling")
