@@ -42,6 +42,7 @@ wiki/                          # Skill root — all artifacts are regenerable
     ├── tfidf-suggest.py
     └── generate-moc-index.py
     └── index-dates.py
+    └── find-needs-processing.py
 ```
 
 **Key principle:** `wiki/` artifacts are ephemeral — fully regenerable from vault source of truth (`atoms/`, `daily notes/`). `dates/` adds a chronological index view. If anything breaks, delete affected files and re-run scripts.
@@ -269,7 +270,8 @@ MOC notes reference cluster members by `[[wikilink]]`, not by cluster ID. The MO
     "max_link_suggestions": 50,
     "max_suggestions_to_validate": 20,
     "min_tfidf_similarity": 0.20,
-    "min_content_tokens": 50
+    "min_content_tokens": 50,
+    "max_ingest_per_run": 10
   },
   "exclude": {
     "tags": ["need-processing", "daily-note"],
@@ -279,7 +281,8 @@ MOC notes reference cluster members by `[[wikilink]]`, not by cluster ID. The MO
   },
   "source_dirs": {
     "tags": ["atoms", "daily notes"],
-    "graph": ["atoms"]
+    "graph": ["atoms"],
+    "ingest": ["atoms"]
   }
 }
 ```
@@ -321,6 +324,7 @@ Scripts fall back to hardcoded defaults if `config.json` is missing or unparseab
 | `tfidf-suggest.py` | `wiki/data/links-graph.json`, vault notes | `wiki/data/semantic-suggestions.md` | Yes |
 | `generate-moc-index.py` | `wiki/data/links-graph.json` | `wiki/moc-index.md` | Yes |
 | `index-dates.py` | `atoms/`, `daily notes/` | `wiki/dates/YYYY/YYYY-MM.md` | Yes |
+| `find-needs-processing.py` | `atoms/` (frontmatter only) | stdout: matching filenames | Yes |
 
 *Cluster labels from label propagation may shift between runs — this is cosmetic.
 

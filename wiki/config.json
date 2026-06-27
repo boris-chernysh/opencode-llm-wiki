@@ -6,7 +6,8 @@
     "max_link_suggestions": 50,
     "max_suggestions_to_validate": 20,
     "min_tfidf_similarity": 0.20,
-    "min_content_tokens": 50
+    "min_content_tokens": 50,
+    "max_ingest_per_run": 10
   },
   "exclude": {
     "tags": ["need-processing", "daily-note"],
@@ -16,6 +17,7 @@
   },
   "source_dirs": {
     "tags": ["atoms", "daily notes"],
-    "graph": ["atoms"]
+    "graph": ["atoms"],
+    "ingest": ["atoms"]
   }
 }

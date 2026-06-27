@@ -6,7 +6,9 @@ Load the llm-wiki skill.
 
 **Step 1 — find target notes:**
 - If a filename is provided as `$ARGUMENTS` → use that single note.
-- Otherwise → find all notes with the `need-processing` tag in `atoms/` (max 10 per run).
+- Otherwise → run `python3 wiki/scripts/find-needs-processing.py` and read the filenames it prints (one per line, max 10 per run).
+  - The script walks `atoms/` (and `daily notes/` if configured in `wiki/config.json → source_dirs.ingest`) and matches **only** the frontmatter `tags:` list. Body text, headings, and filenames that contain the literal string `need-processing` are ignored — do NOT use `grep` or any text scan to discover candidates, that produces false positives.
+  - If the script prints nothing, there are no unprocessed notes — abort cleanly and inform the user.
 
 **Step 2 — for each note:**
 
