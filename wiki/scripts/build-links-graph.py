@@ -25,6 +25,30 @@ def load_config():
         except (json.JSONDecodeError, KeyError):
             pass
 
+def _unwrap_yaml_value(value):
+    """Extract all [[...]] wikilink strings from a frontmatter value.
+
+    Accepts the canonical quoted form '"[[file]]"', the unquoted form
+    '[[file]]', and inline-list forms '"[[a]]", "[[b]]"' or
+    '[["[[a]]", "[[b]]"]]'. Returns either a single wikilink string
+    (if exactly one is found) or a list of wikilink strings.
+    Non-string values are returned unchanged.
+    """
+    if not isinstance(value, str):
+        return value
+    s = value.strip()
+    if not s:
+        return s
+    if len(s) >= 2 and s[0] == s[-1] and s[0] in ('"', "'"):
+        s = s[1:-1].strip()
+    matches = re.findall(r'\[\[[^\]]+\]\]', s)
+    if not matches:
+        return s
+    if len(matches) == 1:
+        return matches[0]
+    return matches
+
+
 def parse_frontmatter(content):
     """Parse YAML-like frontmatter, return (fields_dict, body_text)."""
     fields = {}
@@ -44,8 +68,11 @@ def parse_frontmatter(content):
         if not stripped:
             continue
         if in_list and stripped.startswith('-'):
-            val = stripped[1:].strip().strip('"').strip("'")
-            list_values.append(val)
+            val = _unwrap_yaml_value(stripped[1:].strip())
+            if isinstance(val, list):
+                list_values.extend(val)
+            elif val:
+                list_values.append(val)
             continue
         elif in_list and not stripped.startswith('-'):
             if list_key and list_values:
@@ -58,19 +85,12 @@ def parse_frontmatter(content):
             key, _, value = stripped.partition(':')
             key = key.strip()
             value = value.strip()
-            if value.startswith('[') and value.endswith(']'):
-                items = []
-                for item in value[1:-1].split(','):
-                    item = item.strip().strip('"').strip("'")
-                    if item:
-                        items.append(item)
-                fields[key] = items
-            elif not value:
+            if not value:
                 in_list = True
                 list_key = key
                 list_values = []
             else:
-                fields[key] = value
+                fields[key] = _unwrap_yaml_value(value)
 
     if in_list and list_key and list_values:
         fields[list_key] = list_values
@@ -80,7 +100,12 @@ def parse_frontmatter(content):
 def extract_content_wikilinks(body_text):
     """Extract [[wikilinks]] from body text (content after frontmatter)."""
     links = set()
-    for match in re.finditer(r'\[\[([^\]]+)\]\]', body_text):
+    text = body_text
+    if isinstance(text, str):
+        text = text.strip()
+        if len(text) >= 2 and text[0] == text[-1] and text[0] in ('"', "'"):
+            text = text[1:-1].strip()
+    for match in re.finditer(r'\[\[([^\]]+)\]\]', text):
         target = match.group(1)
         if '|' in target:
             target = target.split('|')[0].strip()
