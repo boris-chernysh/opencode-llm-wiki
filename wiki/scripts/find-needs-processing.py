@@ -14,7 +14,6 @@ Idempotent. Stdlib only.
 
 import json
 import os
-import re
 import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -97,7 +96,6 @@ def frontmatter_has_tag(filepath, tag):
 
 def find_needs_processing(source_dirs, max_results):
     matches = []
-    tag_re = re.compile(re.escape(TARGET_TAG), re.IGNORECASE)
     for src_dir in source_dirs:
         full_dir = os.path.join(PROJECT_ROOT, src_dir)
         if not os.path.isdir(full_dir):
